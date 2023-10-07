@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "budget-app"
+version = "0.1.0"
+description = "My Budget App"
+authors = ["federico.puppo@libero.it"]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+kivy = "^2.0.0"
+requests = "^2.31.0"
+kivymd = "^1.1.1"
+black = "^23.9.1"
+isort = "^5.12.0"
+pytest = "^7.4.2"
+numpy = "^1.26.0"
+pandas = "^2.1.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+

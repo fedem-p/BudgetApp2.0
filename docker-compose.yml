@@ -1,0 +1,9 @@
+version: "3"
+services:
+  app:
+    image: my-budget-image  # Replace with the name of your Docker image
+    container_name: my-budget-container
+    ports:
+      - "8111:8111"  # Replace with the port your app uses
+    volumes:
+      - ./budget-app:/app  # Mount your project directory into the container
