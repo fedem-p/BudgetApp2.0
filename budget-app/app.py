@@ -5,15 +5,19 @@ import random
 from kivy.core.window import Window
 from kivy.lang import Builder
 from kivymd.app import MDApp
-from kivymd.uix.bottomnavigation import (MDBottomNavigation,
-                                         MDBottomNavigationItem)
+from kivymd.uix.bottomnavigation import MDBottomNavigation, MDBottomNavigationItem
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFloatingActionButton, MDRaisedButton
 from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.label import MDLabel
-from kivymd.uix.list import (IconLeftWidget, IconRightWidget, MDList,
-                             OneLineAvatarIconListItem, OneLineIconListItem,
-                             OneLineListItem)
+from kivymd.uix.list import (
+    IconLeftWidget,
+    IconRightWidget,
+    MDList,
+    OneLineAvatarIconListItem,
+    OneLineIconListItem,
+    OneLineListItem,
+)
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.selectioncontrol import MDSwitch

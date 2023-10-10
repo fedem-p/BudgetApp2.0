@@ -12,8 +12,15 @@ sys.path.append(module_directory)
 
 import os
 
-from data_manager import (DATA_CSV, EXAMPLE_DATA, EXAMPLE_METADATA,
-                          METADATA_JSON, DataManager, validate_input, is_used)
+from data_manager import (
+    DATA_CSV,
+    EXAMPLE_DATA,
+    EXAMPLE_METADATA,
+    METADATA_JSON,
+    DataManager,
+    is_used,
+    validate_input,
+)
 
 TEST_FOLDER_PATH = "/tmp/tmp_empty_dir/"
 
@@ -145,23 +152,48 @@ def test_get_account_balance_update(create_empty_folder):
     assert new_manager.get_account_balance(account="C24") == round(50.00, 2)
     assert new_manager.get_account_balance(account="Wallet") == round(15.98, 2)
 
+
 @pytest.mark.parametrize(
-        "item, item_list, item_type, mode, expected_exception, expected_message",
-        [
-        (2, [1, 2, 3], int, "add", ValueError, "Integrity Error: Item: 2 already exists!"),
+    "item, item_list, item_type, mode, expected_exception, expected_message",
+    [
+        (
+            2,
+            [1, 2, 3],
+            int,
+            "add",
+            ValueError,
+            "Integrity Error: Item: 2 already exists!",
+        ),
         (4, [1, 2, 3], int, "add", None, None),
         (2, [1, 2, 3], int, "remove", None, None),
         (4, [1, 2, 3], int, "remove", ValueError, "404 Error: Item: 4 not found!"),
-        (2, [1, 2, 3], int, "invalid", ValueError, "Mode Error: Mode can only be 'add' or 'remove'!"),
-        (2, [1, 2, 3], str, "add", ValueError, "Type Error: 2 is not type <class 'str'>")
-])
-def test_validate_input(item, item_list, item_type, mode, expected_exception, expected_message):
-
+        (
+            2,
+            [1, 2, 3],
+            int,
+            "invalid",
+            ValueError,
+            "Mode Error: Mode can only be 'add' or 'remove'!",
+        ),
+        (
+            2,
+            [1, 2, 3],
+            str,
+            "add",
+            ValueError,
+            "Type Error: 2 is not type <class 'str'>",
+        ),
+    ],
+)
+def test_validate_input(
+    item, item_list, item_type, mode, expected_exception, expected_message
+):
     if expected_exception:
         with pytest.raises(expected_exception, match=expected_message):
             validate_input(item, item_list, item_type, mode)
     else:
         validate_input(item, item_list, item_type, mode)
+
 
 @pytest.mark.parametrize(
     "item, key, my_dict_list, expected_result",
@@ -180,39 +212,38 @@ def test_is_used(item, key, my_dict_list, expected_result):
 
 
 def test_save_metadata(create_empty_folder):
-
     new_manager = DataManager(data_folder=create_empty_folder)
-    #create data
+    # create data
     new_manager.initialize_data()
 
-    #update metadata locally
+    # update metadata locally
     new_manager.accounts.append("test")
     new_manager.categories.append("test")
     new_manager.sub_categories.append("test")
-    
-    #save metadata
+
+    # save metadata
     new_manager.save_metadata()
 
-    #load metadata
+    # load metadata
     new_manager.load_metadata()
 
-    #check if new category is added
+    # check if new category is added
     for item in new_manager.metadata:
         assert "test" in new_manager.metadata[item]
 
-    #remove metadata
+    # remove metadata
     new_manager.accounts.remove("test")
     new_manager.categories.remove("test")
     new_manager.sub_categories.remove("test")
 
-    #don't save
-    new_manager.initialize_data() # init to restore list values
+    # don't save
+    new_manager.initialize_data()  # init to restore list values
 
-    #check if new category is added
+    # check if new category is added
     for item in new_manager.metadata:
         assert "test" in new_manager.metadata[item]
 
-    #remove metadata
+    # remove metadata
     new_manager.accounts.remove("test")
     new_manager.categories.remove("test")
     new_manager.sub_categories.remove("test")
@@ -220,101 +251,93 @@ def test_save_metadata(create_empty_folder):
     # save
     new_manager.save_metadata()
 
-    #load metadata
+    # load metadata
     new_manager.load_metadata()
 
-    #check if new category is added
+    # check if new category is added
     for item in new_manager.metadata:
         assert "test" not in new_manager.metadata[item]
 
 
-
 def test_add_remove_category(create_empty_folder):
-
     new_manager = DataManager(data_folder=create_empty_folder)
-    #create data
+    # create data
     new_manager.initialize_data()
 
     item = "test"
 
-    new_manager.add_category(category = item)
+    new_manager.add_category(category=item)
 
     assert item in new_manager.categories
 
     with pytest.raises(ValueError):
-        new_manager.add_category(category = item)
+        new_manager.add_category(category=item)
 
     with pytest.raises(ValueError):
-        new_manager.add_category(category = 9)
+        new_manager.add_category(category=9)
 
     with pytest.raises(ValueError):
-        new_manager.remove_category(category = "test2")
+        new_manager.remove_category(category="test2")
 
     with pytest.raises(ValueError):
-        new_manager.remove_category(category = "banktransfer")
-    
-    new_manager.remove_category(category = item)
+        new_manager.remove_category(category="banktransfer")
+
+    new_manager.remove_category(category=item)
 
     assert item not in new_manager.categories
 
-    
-
 
 def test_add_remove_subcategory(create_empty_folder):
-
     new_manager = DataManager(data_folder=create_empty_folder)
-    #create data
+    # create data
     new_manager.initialize_data()
 
     item = "test"
 
-    new_manager.add_subcategory(subcategory = item)
+    new_manager.add_subcategory(subcategory=item)
 
     assert item in new_manager.sub_categories
 
     with pytest.raises(ValueError):
-        new_manager.add_subcategory(subcategory = item)
+        new_manager.add_subcategory(subcategory=item)
 
     with pytest.raises(ValueError):
-        new_manager.add_subcategory(subcategory = 9)
+        new_manager.add_subcategory(subcategory=9)
 
     with pytest.raises(ValueError):
-        new_manager.remove_subcategory(subcategory = "test2")
+        new_manager.remove_subcategory(subcategory="test2")
 
     with pytest.raises(ValueError):
-        new_manager.remove_subcategory(subcategory = "evotec")
-    
-    new_manager.remove_subcategory(subcategory = item)
+        new_manager.remove_subcategory(subcategory="evotec")
+
+    new_manager.remove_subcategory(subcategory=item)
 
     assert item not in new_manager.sub_categories
 
 
 def test_add_remove_account(create_empty_folder):
-
     new_manager = DataManager(data_folder=create_empty_folder)
-    #create data
+    # create data
     new_manager.initialize_data()
 
     item = "test"
 
-    new_manager.add_account(account = item)
+    new_manager.add_account(account=item)
 
     assert item in new_manager.accounts
 
     with pytest.raises(ValueError):
-        new_manager.add_account(account = item)
+        new_manager.add_account(account=item)
 
     with pytest.raises(ValueError):
-        new_manager.add_account(account = 9)
+        new_manager.add_account(account=9)
 
     with pytest.raises(ValueError):
-        new_manager.remove_account(account = "test2")
+        new_manager.remove_account(account="test2")
 
     with pytest.raises(ValueError):
-        new_manager.remove_account(account = "evotec")
-    
-    new_manager.remove_account(account = item)
+        new_manager.remove_account(account="evotec")
+
+    new_manager.remove_account(account=item)
 
     assert item not in new_manager.accounts
-
-    
