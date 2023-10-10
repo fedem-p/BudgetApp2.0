@@ -21,6 +21,10 @@ from kivymd.uix.screen import MDScreen
 from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.selectioncontrol import MDSwitch
 from kivymd.uix.tab import MDTabsBase
+from core.data_manager import DataManager
+import os
+
+DATA_PATH = os.path.abspath("./data/")
 
 
 class MyBudgetApp(MDApp):
@@ -33,20 +37,22 @@ class MyBudgetApp(MDApp):
     def build_account_page(self):
         x = 13.99
 
-        accounts = MDScrollView(
-            MDList(
-                OneLineAvatarIconListItem(
-                    IconLeftWidget(icon="bank"), text=f"N26 - Balance: {x}$"
-                ),
-                OneLineAvatarIconListItem(IconLeftWidget(icon="bank"), text="C24"),
-                OneLineAvatarIconListItem(IconLeftWidget(icon="bank"), text="PostePay"),
-                OneLineAvatarIconListItem(
-                    IconLeftWidget(icon="plus"), text="Add a new account"
-                ),
+        accounts = MDList()
+
+        for account in self.data_manager.accounts:
+
+            txt = f"{account} | Balance: {self.data_manager.get_account_balance(account=account)}$" 
+
+            accounts.add_widget(
+                OneLineAvatarIconListItem(IconLeftWidget(icon="bank"), text=txt)
+            )
+        accounts.add_widget(
+            OneLineAvatarIconListItem(
+                IconLeftWidget(icon="plus"), text="Add a new account"
             )
         )
 
-        return accounts
+        return MDScrollView(accounts)
 
     def build_settings(self):
         switch_layout = MDBoxLayout(orientation="horizontal", padding=20, spacing=10)
@@ -140,20 +146,31 @@ class MyBudgetApp(MDApp):
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Orange"
         self.theme_cls.material_style = "M3"
+
+        self.data_manager = DataManager(data_folder=DATA_PATH)
+
+        self.data_manager.initialize_data()
+
         return self.build_main_screen()
 
     def on_start(self):
         # get data
 
-        for i in range(30):
-            d = datetime.datetime.fromtimestamp(random.randint(1666468268, 1696468268))
+        for transaction in self.data_manager.transactions:
+            txt = f"Date:        {transaction['date']},\
+                    Type:        {transaction['type']},\
+                    Amount:      {transaction['amount']}$,\
+                    Account:     {transaction['account']},\
+                    Category:    {transaction['category']},\
+                    SubCategory: {transaction['subcategory']},\
+                    Notes:       {transaction['note']}"
 
             self.transaction_list.add_widget(
                 OneLineListItem(
                     # IconRightWidget(
                     #     icon="delete"
                     # ),
-                    text=f"date: {d.strftime('%Y-%m-%d %H:%M:%S')} / amount: {random.randint(-10,20)*i}$ / account: N26 / Category: Transport",
+                    text=txt,
                 )
             )
 

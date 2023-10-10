@@ -10,14 +10,20 @@ sys.path.append(module_directory)
 
 import os
 
-from data_manager import EXAMPLE_DATA, EXAMPLE_METADATA, DataManager
+from data_manager import (
+    EXAMPLE_DATA,
+    EXAMPLE_METADATA,
+    DataManager,
+    DATA_CSV,
+    METADATA_JSON,
+)
 
 TEST_FOLDER_PATH = "/tmp/tmp_empty_dir/"
 
 
 def clean_data(folder_path):
-    csv_file_path = os.path.join(folder_path, "data.csv")
-    json_file_path = os.path.join(folder_path, "metadata.json")
+    csv_file_path = os.path.join(folder_path, DATA_CSV)
+    json_file_path = os.path.join(folder_path, METADATA_JSON)
 
     if os.path.exists(json_file_path):
         os.remove(json_file_path)
@@ -37,8 +43,8 @@ def create_empty_folder():
 @pytest.fixture
 def create_full_folder(create_empty_folder):
     folder = create_empty_folder
-    csv_file_path = os.path.join(folder, "data.csv")
-    json_file_path = os.path.join(folder, "metadata.json")
+    csv_file_path = os.path.join(folder, DATA_CSV)
+    json_file_path = os.path.join(folder, METADATA_JSON)
 
     with open(csv_file_path, "w"):
         pass
@@ -66,9 +72,7 @@ def test_create_data_file(create_empty_folder):
 
     new_manager.create_data_file()
 
-    assert sorted(["metadata.json", "data.csv"]) == sorted(
-        os.listdir(create_empty_folder)
-    )
+    assert sorted([METADATA_JSON, DATA_CSV]) == sorted(os.listdir(create_empty_folder))
 
 
 @pytest.mark.skip
@@ -108,9 +112,37 @@ def test_initialize_data(create_empty_folder):
     assert new_manager.sub_categories == EXAMPLE_METADATA["subcategories"]
 
 
-# def test_load_transactions(create_empty_folder):
-#     new_manager = DataManager(data_folder=create_empty_folder)
+def test_load_transactions(create_empty_folder):
+    new_manager = DataManager(data_folder=create_empty_folder)
 
-#     new_manager.create_data_file()
+    new_manager.create_data_file()
 
-#     assert new_manager.is_empty_data_folder() == False
+    new_manager.load_transactions()
+    transactions = new_manager.transactions
+
+    for idx, row_element in enumerate(transactions):
+        for k, v in row_element.items():
+            assert v == EXAMPLE_DATA[idx][k]
+
+def test_get_account_balance_no_update(create_empty_folder):
+    new_manager = DataManager(data_folder=create_empty_folder)
+
+    new_manager.create_data_file()
+
+    new_manager.load_transactions()
+
+    new_manager.balances = {"test": 20}
+
+    assert new_manager.get_account_balance(account = "test") == 20
+
+
+def test_get_account_balance_update(create_empty_folder):
+    new_manager = DataManager(data_folder=create_empty_folder)
+
+    new_manager.create_data_file()
+
+    new_manager.load_transactions()
+
+    assert new_manager.get_account_balance(account = "N26") == round(34.5, 2)
+    assert new_manager.get_account_balance(account = "C24") == round(50.00, 2)
+    assert new_manager.get_account_balance(account = "Wallet") == round(15.98, 2)
