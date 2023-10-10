@@ -4,14 +4,19 @@ import sys
 import pytest
 
 # Get the directory containing your module
-module_directory = os.path.abspath("../core/")
+module_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# module_directory =a
+
+# module_directory = os.path.abspath("../core/")
 
 # Append the module directory to sys.path
-sys.path.append(module_directory)
+# sys.path.append('../')
+sys.path.insert(0,module_directory)
 
 import os
 
-from data_manager import (
+from core.data_manager import (
     DATA_CSV,
     EXAMPLE_DATA,
     EXAMPLE_METADATA,
