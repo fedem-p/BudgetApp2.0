@@ -32,7 +32,7 @@ jobs:
         run: poetry run black . --check
 
       - name: Linting-Isort
-        run: poetry run isort . --check
+        run: poetry run isort --profile black . --check
 
       - name: Linting-Pylint
         run: poetry run pylint $(git ls-files '*.py')
