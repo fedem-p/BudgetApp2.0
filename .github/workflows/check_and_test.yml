@@ -39,6 +39,9 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./budget-app
     steps:
       - uses: actions/checkout@v3
 
@@ -59,28 +62,3 @@ jobs:
       - name: Testing
         run: poetry run pytest -s
 
-# name: Run pytest on Push
-
-# on:
-#   push:
-#     branches:
-#       - main  # Adjust this to the branch you want to trigger the workflow on
-
-# jobs:
-#   pytest:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#     - name: Checkout code
-#       uses: actions/checkout@v2
-
-#     - name: Set up Python
-#       uses: actions/setup-python@v2
-#       with:
-#         python-version: 3.x  # Choose the Python version you need
-
-#     - name: Install dependencies
-#       run: pip install -r requirements.txt  # If you have a requirements file
-
-#     - name: Run pytest
-#       run: pytest  # Replace with the actual pytest command and arguments
