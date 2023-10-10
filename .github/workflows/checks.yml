@@ -23,8 +23,11 @@ jobs:
           poetry install
 
       # Run script
-      - name: Linting
+      - name: Linting-Black
         run: poetry run black . --check
+
+      - name: Linting-Isort
+        run: poetry run isort . --check
 
   test:
     runs-on: ubuntu-latest
