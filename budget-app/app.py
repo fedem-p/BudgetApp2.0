@@ -1,28 +1,25 @@
 import datetime
+import os
 import random
 
 from kivy.core.window import Window
 from kivy.lang import Builder
 from kivymd.app import MDApp
-from kivymd.uix.bottomnavigation import MDBottomNavigation, MDBottomNavigationItem
+from kivymd.uix.bottomnavigation import (MDBottomNavigation,
+                                         MDBottomNavigationItem)
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFloatingActionButton, MDRaisedButton
 from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.label import MDLabel
-from kivymd.uix.list import (
-    IconLeftWidget,
-    IconRightWidget,
-    MDList,
-    OneLineAvatarIconListItem,
-    OneLineIconListItem,
-    OneLineListItem,
-)
+from kivymd.uix.list import (IconLeftWidget, IconRightWidget, MDList,
+                             OneLineAvatarIconListItem, OneLineIconListItem,
+                             OneLineListItem)
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.selectioncontrol import MDSwitch
 from kivymd.uix.tab import MDTabsBase
+
 from core.data_manager import DataManager
-import os
 
 DATA_PATH = os.path.abspath("./data/")
 
@@ -40,8 +37,7 @@ class MyBudgetApp(MDApp):
         accounts = MDList()
 
         for account in self.data_manager.accounts:
-
-            txt = f"{account} | Balance: {self.data_manager.get_account_balance(account=account)}$" 
+            txt = f"{account} | Balance: {self.data_manager.get_account_balance(account=account)}$"
 
             accounts.add_widget(
                 OneLineAvatarIconListItem(IconLeftWidget(icon="bank"), text=txt)

@@ -108,7 +108,7 @@ class DataManager:
     def __init__(self, data_folder: str = "../data"):
         # TODO check if it's a folder path
         self.data_folder = data_folder
-        #TODO collect all self variables and initialize to none
+        # TODO collect all self variables and initialize to none
         self.balances = None
 
     def initialize_data(self):
@@ -157,25 +157,22 @@ class DataManager:
             json_data = json.load(file)
         self.metadata = json_data
 
-    def get_account_balance(self,account):
+    def get_account_balance(self, account):
         if self.balances is not None:
             if account in self.balances:
                 return self.balances[account]
-            
-        
+
         # generate balance
         self.update_balance(account)
         return self.balances[account]
 
-    def update_balance(self,account):
+    def update_balance(self, account):
         new_balance = 0
         if self.balances is None:
             self.balances = {}
 
         for transaction in self.transactions:
-            if transaction['account'] == account:
-                new_balance += transaction['amount']
+            if transaction["account"] == account:
+                new_balance += transaction["amount"]
 
         self.balances[account] = round(new_balance, 2)
-                
-
