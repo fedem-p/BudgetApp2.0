@@ -1,22 +1,18 @@
+import os
 import sys
 
 import pytest
 
 # Get the directory containing your module
-module_directory = "/home/fpuppo/workspace/budget-app/budget-app/core"
+module_directory = os.path.abspath("../core/")
 
 # Append the module directory to sys.path
 sys.path.append(module_directory)
 
 import os
 
-from data_manager import (
-    EXAMPLE_DATA,
-    EXAMPLE_METADATA,
-    DataManager,
-    DATA_CSV,
-    METADATA_JSON,
-)
+from data_manager import (DATA_CSV, EXAMPLE_DATA, EXAMPLE_METADATA,
+                          METADATA_JSON, DataManager)
 
 TEST_FOLDER_PATH = "/tmp/tmp_empty_dir/"
 
@@ -124,6 +120,7 @@ def test_load_transactions(create_empty_folder):
         for k, v in row_element.items():
             assert v == EXAMPLE_DATA[idx][k]
 
+
 def test_get_account_balance_no_update(create_empty_folder):
     new_manager = DataManager(data_folder=create_empty_folder)
 
@@ -133,7 +130,7 @@ def test_get_account_balance_no_update(create_empty_folder):
 
     new_manager.balances = {"test": 20}
 
-    assert new_manager.get_account_balance(account = "test") == 20
+    assert new_manager.get_account_balance(account="test") == 20
 
 
 def test_get_account_balance_update(create_empty_folder):
@@ -143,6 +140,6 @@ def test_get_account_balance_update(create_empty_folder):
 
     new_manager.load_transactions()
 
-    assert new_manager.get_account_balance(account = "N26") == round(34.5, 2)
-    assert new_manager.get_account_balance(account = "C24") == round(50.00, 2)
-    assert new_manager.get_account_balance(account = "Wallet") == round(15.98, 2)
+    assert new_manager.get_account_balance(account="N26") == round(34.5, 2)
+    assert new_manager.get_account_balance(account="C24") == round(50.00, 2)
+    assert new_manager.get_account_balance(account="Wallet") == round(15.98, 2)
