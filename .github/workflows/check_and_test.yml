@@ -1,81 +1,81 @@
-# name: Lint and Test
-
-# on:
-#   push:
-#     branches:
-#       - main
-#    workflow_dispatch:
-
-# jobs:
-#   lint:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v3
-
-#       # Install dependencies
-#       - name: Set up Python
-#         uses: actions/setup-python@v4
-#         with:
-#           python-version: "3.9"
-
-#       - name: Install dependencies
-#         run: |
-#           python -m pip install --upgrade pip
-#           pip install poetry
-#           cd budget-app/
-#           poetry install
-
-#       # Run script
-#       - name: Linting-Black
-#         run: poetry run black . --check
-
-#       - name: Linting-Isort
-#         run: poetry run isort . --check
-
-#   test:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v3
-
-#       # Install dependencies
-#       - name: Set up Python
-#         uses: actions/setup-python@v4
-#         with:
-#           python-version: "3.9"
-
-#       - name: Install dependencies
-#         run: |
-#           python -m pip install --upgrade pip
-#           pip install poetry
-#           cd budget-app/
-#           poetry install
-
-#       # Run script
-#       - name: Testing
-#         run: poetry run pytest -s
-
-name: Run pytest on Push
+name: Lint and Test
 
 on:
   push:
     branches:
-      - main  # Adjust this to the branch you want to trigger the workflow on
+      - main
+   workflow_dispatch:
 
 jobs:
-  pytest:
+  lint:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.x  # Choose the Python version you need
+      # Install dependencies
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
 
-    - name: Install dependencies
-      run: pip install -r requirements.txt  # If you have a requirements file
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          cd budget-app/
+          poetry install
 
-    - name: Run pytest
-      run: pytest  # Replace with the actual pytest command and arguments
+      # Run script
+      - name: Linting-Black
+        run: poetry run black . --check
+
+      - name: Linting-Isort
+        run: poetry run isort . --check
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Install dependencies
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          cd budget-app/
+          poetry install
+
+      # Run script
+      - name: Testing
+        run: poetry run pytest -s
+
+# name: Run pytest on Push
+
+# on:
+#   push:
+#     branches:
+#       - main  # Adjust this to the branch you want to trigger the workflow on
+
+# jobs:
+#   pytest:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - name: Checkout code
+#       uses: actions/checkout@v2
+
+#     - name: Set up Python
+#       uses: actions/setup-python@v2
+#       with:
+#         python-version: 3.x  # Choose the Python version you need
+
+#     - name: Install dependencies
+#       run: pip install -r requirements.txt  # If you have a requirements file
+
+#     - name: Run pytest
+#       run: pytest  # Replace with the actual pytest command and arguments
