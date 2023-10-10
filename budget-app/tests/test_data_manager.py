@@ -5,7 +5,6 @@ import pytest
 
 # Get the directory containing your module
 module_directory = os.path.abspath("../core/")
-print(module_directory)
 
 # Append the module directory to sys.path
 sys.path.append(module_directory)
