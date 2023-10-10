@@ -35,7 +35,7 @@ jobs:
       - name: Linting-Isort
         run: poetry run isort . --check
 
-      -name: Linting-Pylint
+      - name: Linting-Pylint
         run: poetry run pylint $(git ls-files '*.py')
 
   test:
