@@ -87,7 +87,7 @@ EXAMPLE_DATA = [
     {
         "date": "2020-12-16",
         "type": "income",
-        "amount": 50.0,
+    "amount": 50.0,
         "account": "C24",
         "category": "banktransfer",
         "subcategory": "",
@@ -102,6 +102,27 @@ EXAMPLE_METADATA = {
 
 DATA_CSV = "data.csv"
 METADATA_JSON = "metadata.json"
+
+
+def validate_input(item, item_list, item_type, mode = "add"):
+
+    if mode != "add" and mode != "remove":
+        raise ValueError("Mode Error: Mode can only be 'add' or 'remove'!")
+
+    if not isinstance(item, item_type):
+        raise ValueError(f"Type Error: {item} is not type {item_type}")
+    
+    if mode == 'add':
+        if item in item_list:
+            raise ValueError(f"Integrity Error: Item: {item} already exists!")
+        
+    if mode == 'remove':
+        if item not in item_list:
+            raise ValueError(f"404 Error: Item: {item} not found!")
+        
+def is_used(item, key, my_dict_list):
+    found = any(d.get(key) == item for d in my_dict_list)
+    return found
 
 
 class DataManager:
@@ -176,3 +197,82 @@ class DataManager:
                 new_balance += transaction["amount"]
 
         self.balances[account] = round(new_balance, 2)
+
+    def save_metadata(self):
+        #TODO keep last n version of a file
+        #update metadata
+        self.metadata["accounts"] = self.accounts
+        self.metadata["categories"] = self.categories
+        self.metadata["subcategories"] = self.sub_categories
+
+        with open(os.path.join(self.data_folder, METADATA_JSON), "w") as file:
+            json.dump(self.metadata, file, indent=4)
+    
+
+    def add_category(self, category):
+
+        validate_input(item = category, item_list = self.categories, item_type = str, mode="add")
+
+        # add category
+        self.categories.append(category)
+
+        # save new metadata
+        self.save_metadata()
+
+    def add_subcategory(self, subcategory):
+        validate_input(item = subcategory, item_list = self.sub_categories, item_type = str, mode="add")
+
+        # add category
+        self.sub_categories.append(subcategory)
+
+        # save new metadata
+        self.save_metadata()
+
+    def add_account(self, account):
+        validate_input(item = account, item_list = self.accounts, item_type = str, mode="add")
+
+        # add category
+        self.accounts.append(account)
+
+        # save new metadata
+        self.save_metadata()
+
+    def remove_category(self, category):
+        validate_input(item = category, item_list = self.categories, item_type = str, mode="remove")
+
+        # check if item is used
+        if is_used(item=category, key="category", my_dict_list=self.transactions):
+            raise ValueError(f"Integrity Error: Item: {category} is still in use!")
+
+        # add category
+        self.categories.remove(category)
+
+        # save new metadata
+        self.save_metadata()
+
+    def remove_subcategory(self, subcategory):
+        validate_input(item = subcategory, item_list = self.sub_categories, item_type = str, mode="remove")
+
+        # check if item is used
+        if is_used(item=subcategory, key="subcategory", my_dict_list=self.transactions):
+            raise ValueError(f"Integrity Error: Item: {subcategory} is still in use!")
+
+        # add category
+        self.sub_categories.remove(subcategory)
+
+        # save new metadata
+        self.save_metadata()
+
+    def remove_account(self, account):
+        validate_input(item = account, item_list = self.accounts, item_type = str, mode="remove")
+
+        # check if item is used
+         # check if item is used
+        if is_used(item=account, key="account", my_dict_list=self.transactions):
+            raise ValueError(f"Integrity Error: Item: {account} is still in use!")
+
+        # add category
+        self.accounts.remove(account)
+
+        # save new metadata
+        self.save_metadata()
