@@ -22,6 +22,7 @@ from kivymd.uix.screen import MDScreen
 from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.selectioncontrol import MDSwitch
 from kivymd.uix.tab import MDTabsBase
+from kivymd.uix.textfield import MDTextField
 
 from core.data_manager import DataManager
 
@@ -36,23 +37,40 @@ class MyBudgetApp(MDApp):
             self.theme_cls.theme_style = "Dark"
 
     def build_account_page(self):
-        x = 13.99
-
-        accounts = MDList()
+        self.accounts_list = MDList()
 
         for account in self.data_manager.accounts:
             txt = f"{account} | Balance: {self.data_manager.get_account_balance(account=account)}$"
 
-            accounts.add_widget(
+            self.accounts_list.add_widget(
                 OneLineAvatarIconListItem(IconLeftWidget(icon="bank"), text=txt)
             )
-        accounts.add_widget(
+        self.accounts_list.add_widget(
             OneLineAvatarIconListItem(
-                IconLeftWidget(icon="plus"), text="Add a new account"
+                IconLeftWidget(icon="plus"), text="Add a new account",on_release=self.update_account_list
             )
         )
 
-        return MDScrollView(accounts)
+        return MDScrollView(self.accounts_list)
+
+    def update_account_list(self, instance):
+        text_input = MDTextField(hint_text="Enter a new account")
+        text_input.on_text_validate = lambda: self.add_new_account(text_input, text_input.text)
+        self.accounts_list.remove_widget(instance)
+        self.accounts_list.add_widget(text_input)
+
+    def add_new_account(self,text_input, text):
+        self.accounts_list.remove_widget(text_input)
+        self.data_manager.add_account(account=text)
+        txt = f"{text} | Balance: {self.data_manager.get_account_balance(account=text)}$"
+        self.accounts_list.add_widget(
+                OneLineAvatarIconListItem(IconLeftWidget(icon="bank"), text=txt)
+            )
+        self.accounts_list.add_widget(
+            OneLineAvatarIconListItem(
+                IconLeftWidget(icon="plus"), text="Add a new account",on_release=self.update_account_list
+            )
+        )
 
     def build_settings(self):
         switch_layout = MDBoxLayout(orientation="horizontal", padding=20, spacing=10)
@@ -182,100 +200,3 @@ class MyBudgetApp(MDApp):
 
 if __name__ == "__main__":
     MyBudgetApp().run()
-
-
-# from kivy.lang import Builder
-# from kivy.properties import StringProperty
-# from kivy.uix.screenmanager import Screen
-
-# from kivymd.icon_definitions import md_icons
-# from kivymd.app import MDApp
-# from kivymd.uix.list import OneLineIconListItem
-
-
-# Builder.load_string(
-#     '''
-# #:import images_path kivymd.images_path
-
-
-# <CustomOneLineIconListItem>
-
-#     IconLeftWidget:
-#         icon: root.icon
-
-
-# <PreviousMDIcons>
-
-#     MDBoxLayout:
-#         orientation: 'vertical'
-#         spacing: dp(10)
-#         padding: dp(20)
-
-#         MDBoxLayout:
-#             adaptive_height: True
-
-#             MDIconButton:
-#                 icon: 'magnify'
-
-#             MDTextField:
-#                 id: search_field
-#                 hint_text: 'Search icon'
-#                 on_text: root.set_list_md_icons(self.text, True)
-
-#         RecycleView:
-#             id: rv
-#             key_viewclass: 'viewclass'
-#             key_size: 'height'
-
-#             RecycleBoxLayout:
-#                 padding: dp(10)
-#                 default_size: None, dp(48)
-#                 default_size_hint: 1, None
-#                 size_hint_y: None
-#                 height: self.minimum_height
-#                 orientation: 'vertical'
-# '''
-# )
-
-
-# class CustomOneLineIconListItem(OneLineIconListItem):
-#     icon = StringProperty()
-
-
-# class PreviousMDIcons(Screen):
-
-#     def set_list_md_icons(self, text="", search=False):
-#         '''Builds a list of icons for the screen MDIcons.'''
-
-#         def add_icon_item(name_icon):
-#             self.ids.rv.data.append(
-#                 {
-#                     "viewclass": "CustomOneLineIconListItem",
-#                     "icon": name_icon,
-#                     "text": name_icon,
-#                     "callback": lambda x: x,
-#                 }
-#             )
-
-#         self.ids.rv.data = []
-#         for name_icon in md_icons.keys():
-#             if search:
-#                 if text in name_icon:
-#                     add_icon_item(name_icon)
-#             else:
-#                 add_icon_item(name_icon)
-
-
-# class MainApp(MDApp):
-#     def __init__(self, **kwargs):
-#         super().__init__(**kwargs)
-#         self.screen = PreviousMDIcons()
-
-#     def build(self):
-#         return self.screen
-
-#     def on_start(self):
-#         self.screen.set_list_md_icons()
-
-
-# MainApp().run()
