@@ -3,11 +3,9 @@ name: Lint and Test
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
 
 jobs:
-  lint:
+  black:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -27,12 +25,55 @@ jobs:
           pip install poetry
           poetry install
 
-      # Run script
-      - name: Linting-Black
+      - name: Linting-black
         run: poetry run black . --check
+  
+  isort:
+    needs: black
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./budget-app
+    steps:
+      - uses: actions/checkout@v3
 
-      - name: Linting-Isort
+      # Install dependencies
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry install
+
+      - name: Linting-isort
         run: poetry run isort --profile black . --check
+  
+
+
+  pylint:
+    needs: isort
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./budget-app
+    steps:
+      - uses: actions/checkout@v3
+
+      # Install dependencies
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry install
 
       - name: Linting-Pylint
         run: poetry run pylint $(git ls-files '*.py')
