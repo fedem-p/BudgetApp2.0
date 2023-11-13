@@ -43,7 +43,10 @@ class MyBudgetApp(MDApp):
             txt = f"{account} | Balance: {self.data_manager.get_account_balance(account=account)}$"
 
             self.accounts_list.add_widget(
-                OneLineAvatarIconListItem(IconLeftWidget(icon="bank"), text=txt)
+                OneLineAvatarIconListItem(
+                    IconLeftWidget(icon="bank"), 
+                    IconRightWidget(icon="delete", on_release=lambda x, item=[account,txt]: self.delete_account(item)), 
+                    text=txt)
             )
         self.accounts_list.add_widget(
             OneLineAvatarIconListItem(
@@ -64,13 +67,24 @@ class MyBudgetApp(MDApp):
         self.data_manager.add_account(account=text)
         txt = f"{text} | Balance: {self.data_manager.get_account_balance(account=text)}$"
         self.accounts_list.add_widget(
-                OneLineAvatarIconListItem(IconLeftWidget(icon="bank"), text=txt)
+                OneLineAvatarIconListItem(IconLeftWidget(icon="bank"),IconRightWidget(icon="delete", on_release=lambda x, item=[text,txt]: self.delete_account(item)), text=txt)
             )
         self.accounts_list.add_widget(
             OneLineAvatarIconListItem(
                 IconLeftWidget(icon="plus"), text="Add a new account",on_release=self.update_account_list
             )
         )
+    def delete_account(self, input_list):
+        account = input_list[0]
+        txt = input_list[1]
+        print(account)
+        print(txt)
+        # self.accounts_list.remove_widget(instance)
+        # Remove the corresponding widget from the layout
+        widget_to_remove = next(widget for widget in self.accounts_list.children if widget.text == txt)
+        self.accounts_list.remove_widget(widget_to_remove)
+        self.data_manager.remove_account(account=account)
+
 
     def build_settings(self):
         switch_layout = MDBoxLayout(orientation="horizontal", padding=20, spacing=10)

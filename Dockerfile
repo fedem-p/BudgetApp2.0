@@ -12,6 +12,8 @@ RUN pip install poetry
 
 RUN python3 -m pip install --upgrade pip setuptools virtualenv
 RUN python3 -m pip install "kivy[base]" kivy_examples
+
+RUN sudo apt-get install xclip
 # Install project dependencies using Poetry
 # RUN poetry config virtualenvs.create false \
 #     && poetry install --no-interaction --no-ansi
