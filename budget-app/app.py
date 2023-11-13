@@ -50,7 +50,9 @@ class MyBudgetApp(MDApp):
             )
         self.accounts_list.add_widget(
             OneLineAvatarIconListItem(
-                IconLeftWidget(icon="plus"), text="Add a new account",on_release=self.update_account_list
+                IconLeftWidget(icon="plus"),
+                text="Add a new account",
+                on_release=self.update_account_list,
             )
         )
 
@@ -58,20 +60,26 @@ class MyBudgetApp(MDApp):
 
     def update_account_list(self, instance):
         text_input = MDTextField(hint_text="Enter a new account")
-        text_input.on_text_validate = lambda: self.add_new_account(text_input, text_input.text)
+        text_input.on_text_validate = lambda: self.add_new_account(
+            text_input, text_input.text
+        )
         self.accounts_list.remove_widget(instance)
         self.accounts_list.add_widget(text_input)
 
-    def add_new_account(self,text_input, text):
+    def add_new_account(self, text_input, text):
         self.accounts_list.remove_widget(text_input)
         self.data_manager.add_account(account=text)
-        txt = f"{text} | Balance: {self.data_manager.get_account_balance(account=text)}$"
+        txt = (
+            f"{text} | Balance: {self.data_manager.get_account_balance(account=text)}$"
+        )
         self.accounts_list.add_widget(
                 OneLineAvatarIconListItem(IconLeftWidget(icon="bank"),IconRightWidget(icon="delete", on_release=lambda x, item=[text,txt]: self.delete_account(item)), text=txt)
             )
         self.accounts_list.add_widget(
             OneLineAvatarIconListItem(
-                IconLeftWidget(icon="plus"), text="Add a new account",on_release=self.update_account_list
+                IconLeftWidget(icon="plus"),
+                text="Add a new account",
+                on_release=self.update_account_list,
             )
         )
     def delete_account(self, input_list):
