@@ -3,8 +3,6 @@
 
 # import pytest
 
-# TODO add tests
-
 # # Get the directory containing your module
 # module_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -33,8 +31,3 @@
 #     dm = data_manager
 
 #     account_page = AccountPage(dm)
-
-#     test_account_widget = account_page.single_account_widget(account="my_test_account", txt = "my_test_account | Balance: 0")
-
-#     assert isinstance(test_account_widget,OneLineAvatarIconListItem)
-#     assert test_account_widget.text == "my_test_account | Balance: 0"

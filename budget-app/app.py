@@ -1,26 +1,10 @@
+"""Budget app to track expenses and income."""
 import os
 
-from kivy.core.window import Window
-from kivy.lang import Builder
 from kivymd.app import MDApp
-from kivymd.uix.bottomnavigation import MDBottomNavigation, MDBottomNavigationItem
-from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFloatingActionButton, MDRaisedButton
-from kivymd.uix.gridlayout import MDGridLayout
-from kivymd.uix.label import MDLabel
-from kivymd.uix.list import (
-    IconLeftWidget,
-    IconRightWidget,
-    MDList,
-    OneLineAvatarIconListItem,
-    OneLineIconListItem,
-    OneLineListItem,
-)
+from kivymd.uix.bottomnavigation import MDBottomNavigation
+from kivymd.uix.button import MDFloatingActionButton
 from kivymd.uix.screen import MDScreen
-from kivymd.uix.scrollview import MDScrollView
-from kivymd.uix.selectioncontrol import MDSwitch
-from kivymd.uix.tab import MDTabsBase
-from kivymd.uix.textfield import MDTextField
 
 from core.account_panel import AccountPage
 from core.data_manager import DataManager
@@ -32,7 +16,38 @@ DATA_PATH = os.path.abspath("./data/")
 
 
 class MyBudgetApp(MDApp):
+    """Creates an app to track expenses and income."""
+
+    def build(self):
+        self.theme_cls.theme_style = "Dark"
+        self.theme_cls.primary_palette = "Orange"
+        self.theme_cls.material_style = "M3"
+
+        self.data_manager = DataManager(data_folder=DATA_PATH)  # pylint: disable=W0201
+
+        self.data_manager.initialize_data()
+
+        self.account_page = AccountPage(  # pylint: disable=W0201
+            data_manager=self.data_manager
+        )
+        self.transaction_page = TransactionPage(  # pylint: disable=W0201
+            data_manager=self.data_manager
+        )
+        self.overview_page = OverviewPage(  # pylint: disable=W0201
+            data_manager=self.data_manager
+        )
+        self.settings_page = SettingsPage(  # pylint: disable=W0201
+            data_manager=self.data_manager
+        )
+
+        return self.build_main_screen()
+
     def build_main_screen(self):
+        """Function to create the main screen of the app.
+
+        Returns:
+            MDScreen: screen with a bottom navbar and multiple pages.
+        """
         navbar = MDBottomNavigation(
             self.overview_page.build_page(),
             self.account_page.build_page(),
@@ -46,27 +61,11 @@ class MyBudgetApp(MDApp):
             navbar,
             MDFloatingActionButton(
                 icon="plus",
-                # TODO: put them in the bottom left corner symmetrically (based on window size)
+                # TODO: put them in the bottom left corner symmetrically (based on window size) # pylint: disable=W0511
                 pos=(0, navbar.height + 5),
                 pos_hint={"right": 0.99},
             ),
         )
-
-    def build(self):
-        self.theme_cls.theme_style = "Dark"
-        self.theme_cls.primary_palette = "Orange"
-        self.theme_cls.material_style = "M3"
-
-        self.data_manager = DataManager(data_folder=DATA_PATH)
-
-        self.data_manager.initialize_data()
-
-        self.account_page = AccountPage(data_manager=self.data_manager)
-        self.transaction_page = TransactionPage(data_manager=self.data_manager)
-        self.overview_page = OverviewPage(data_manager=self.data_manager)
-        self.settings_page = SettingsPage(data_manager=self.data_manager)
-
-        return self.build_main_screen()
 
 
 if __name__ == "__main__":
