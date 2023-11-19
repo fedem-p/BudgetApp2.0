@@ -2,6 +2,7 @@
 
 [![Linting](https://github.com/fedem-p/BudgetApp2.0/actions/workflows/linting.yml/badge.svg)](https://github.com/fedem-p/BudgetApp2.0)
 [![Tests](https://github.com/fedem-p/BudgetApp2.0/actions/workflows/testing.yml/badge.svg)](https://github.com/fedem-p/BudgetApp2.0)
+[![CodeFactor](https://www.codefactor.io/repository/github/fedem-p/budgetapp2.0/badge)](https://www.codefactor.io/repository/github/fedem-p/budgetapp2.0)
 
 a simple app to track expenses and incomes.
 
