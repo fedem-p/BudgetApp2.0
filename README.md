@@ -6,7 +6,7 @@
 
 a simple app to track expenses and incomes.
 
-## Detting started
+## Getting started
 
 To run the app you'll need to have `poetry` installed:
 
