@@ -1,6 +1,4 @@
-import datetime
 import os
-import random
 
 from kivy.core.window import Window
 from kivy.lang import Builder
@@ -24,165 +22,22 @@ from kivymd.uix.selectioncontrol import MDSwitch
 from kivymd.uix.tab import MDTabsBase
 from kivymd.uix.textfield import MDTextField
 
+from core.account_panel import AccountPage
 from core.data_manager import DataManager
+from core.overview_panel import OverviewPage
+from core.settings_panel import SettingsPage
+from core.transactions_panel import TransactionPage
 
 DATA_PATH = os.path.abspath("./data/")
 
 
 class MyBudgetApp(MDApp):
-    def on_switch_active(self, instance, value):
-        if value:
-            self.theme_cls.theme_style = "Light"
-        else:
-            self.theme_cls.theme_style = "Dark"
-
-    def build_account_page(self):
-        self.accounts_list = MDList()
-
-        for account in self.data_manager.accounts:
-            txt = f"{account} | Balance: {self.data_manager.get_account_balance(account=account)}$"
-
-            self.accounts_list.add_widget(
-                OneLineAvatarIconListItem(
-                    IconLeftWidget(icon="bank"),
-                    IconRightWidget(
-                        icon="delete",
-                        on_release=lambda x, item=[account, txt]: self.delete_account(
-                            item
-                        ),
-                    ),
-                    text=txt,
-                )
-            )
-        self.accounts_list.add_widget(
-            OneLineAvatarIconListItem(
-                IconLeftWidget(icon="plus"),
-                text="Add a new account",
-                on_release=self.update_account_list,
-            )
-        )
-
-        return MDScrollView(self.accounts_list)
-
-    def update_account_list(self, instance):
-        text_input = MDTextField(hint_text="Enter a new account")
-        text_input.on_text_validate = lambda: self.add_new_account(
-            text_input, text_input.text
-        )
-        self.accounts_list.remove_widget(instance)
-        self.accounts_list.add_widget(text_input)
-
-    def add_new_account(self, text_input, text):
-        self.accounts_list.remove_widget(text_input)
-        self.data_manager.add_account(account=text)
-        txt = (
-            f"{text} | Balance: {self.data_manager.get_account_balance(account=text)}$"
-        )
-        self.accounts_list.add_widget(
-            OneLineAvatarIconListItem(
-                IconLeftWidget(icon="bank"),
-                IconRightWidget(
-                    icon="delete",
-                    on_release=lambda x, item=[text, txt]: self.delete_account(item),
-                ),
-                text=txt,
-            )
-        )
-        self.accounts_list.add_widget(
-            OneLineAvatarIconListItem(
-                IconLeftWidget(icon="plus"),
-                text="Add a new account",
-                on_release=self.update_account_list,
-            )
-        )
-
-    def delete_account(self, input_list):
-        account = input_list[0]
-        txt = input_list[1]
-        print(account)
-        print(txt)
-        # self.accounts_list.remove_widget(instance)
-        # Remove the corresponding widget from the layout
-        widget_to_remove = next(
-            widget for widget in self.accounts_list.children if widget.text == txt
-        )
-        self.accounts_list.remove_widget(widget_to_remove)
-        self.data_manager.remove_account(account=account)
-
-    def build_settings(self):
-        switch_layout = MDBoxLayout(orientation="horizontal", padding=20, spacing=10)
-
-        label = MDLabel(text="Toggle Switch")
-        switch = MDSwitch()
-        switch.bind(active=self.on_switch_active)
-
-        switch_layout.add_widget(label)
-        switch_layout.add_widget(switch)
-
-        grid_layout = MDGridLayout(cols=1, adaptive_height=True, padding=10, spacing=10)
-
-        grid_layout.add_widget(switch_layout)
-        grid_layout.add_widget(
-            OneLineAvatarIconListItem(
-                IconLeftWidget(icon="github"),
-                text="Download data (csv file)",
-                on_release=lambda x: print("Downloading data!"),  # TODO
-            )
-        )
-        grid_layout.add_widget(
-            OneLineAvatarIconListItem(
-                IconLeftWidget(icon="github"),
-                text="Upload data (csv file)",
-                on_release=lambda x: print("Uploading data!"),  # TODO
-            )
-        )
-        grid_layout.add_widget(
-            OneLineAvatarIconListItem(
-                IconLeftWidget(icon="github"),
-                text="Categories",
-                on_release=lambda x: print("Add/Remove Category"),  # TODO
-            )
-        )
-        grid_layout.add_widget(
-            OneLineAvatarIconListItem(
-                IconLeftWidget(icon="github"),
-                text="SubCategories",
-                on_release=lambda x: print("Add/Remove SubCategory"),  # TODO
-            )
-        )
-
-        return grid_layout
-
     def build_main_screen(self):
         navbar = MDBottomNavigation(
-            MDBottomNavigationItem(
-                MDLabel(
-                    text="Dashboard",
-                    halign="center",
-                ),
-                name="dashboard",
-                text="Dashboard",
-                icon="chart-pie",
-            ),
-            MDBottomNavigationItem(
-                self.build_account_page(),
-                name="accounts",
-                text="Accounts",
-                icon="bank",
-                badge_icon="numeric-3",
-            ),
-            MDBottomNavigationItem(
-                self.build_transactions(),
-                name="transactions",
-                text="Transactions",
-                icon="format-list-bulleted",
-            ),
-            MDBottomNavigationItem(
-                self.build_settings(),
-                name="settings",
-                text="Settings",
-                icon="cog",
-            ),
+            self.overview_page.build_page(),
+            self.account_page.build_page(),
+            self.transaction_page.build_page(),
+            self.settings_page.build_page(),
             selected_color_background="orange",
             text_color_active="lightgrey",
         )
@@ -206,33 +61,12 @@ class MyBudgetApp(MDApp):
 
         self.data_manager.initialize_data()
 
+        self.account_page = AccountPage(data_manager=self.data_manager)
+        self.transaction_page = TransactionPage(data_manager=self.data_manager)
+        self.overview_page = OverviewPage(data_manager=self.data_manager)
+        self.settings_page = SettingsPage(data_manager=self.data_manager)
+
         return self.build_main_screen()
-
-    def on_start(self):
-        # get data
-
-        for transaction in self.data_manager.transactions:
-            txt = f"Date:        {transaction['date']},\
-                    Type:        {transaction['type']},\
-                    Amount:      {transaction['amount']}$,\
-                    Account:     {transaction['account']},\
-                    Category:    {transaction['category']},\
-                    SubCategory: {transaction['subcategory']},\
-                    Notes:       {transaction['note']}"
-
-            self.transaction_list.add_widget(
-                OneLineListItem(
-                    # IconRightWidget(
-                    #     icon="delete"
-                    # ),
-                    text=txt,
-                )
-            )
-
-    def build_transactions(self):
-        self.transaction_list = MDList(id="container")
-
-        return MDScrollView(self.transaction_list)
 
 
 if __name__ == "__main__":

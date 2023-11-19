@@ -2,7 +2,7 @@
 name = "budget-app"
 version = "0.1.0"
 description = "My Budget App"
-authors = ["federico.puppo@libero.it"]
+authors = ["Federico Puppo <federico.puppo@libero.it>"]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
