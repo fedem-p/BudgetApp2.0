@@ -14,99 +14,37 @@ operations:
 
 """
 
-import csv
 import json
 import os
 
 import pandas as pd
 
-# TODO handle with pandas
-EXAMPLE_DATA = [
-    {
-        "date": "2018-01-03",
-        "type": "income",
-        "amount": 94.0,
-        "account": "N26",
-        "category": "salary",
-        "subcategory": "evotec",
-        "note": "may",
-    },
-    {
-        "date": "2018-01-02",
-        "type": "income",
-        "amount": 39.48,
-        "account": "Wallet",
-        "category": "gift",
-        "subcategory": "family",
-        "note": "christmas",
-    },
-    {
-        "date": "2018-05-11",
-        "type": "expense",
-        "amount": -7.0,
-        "account": "Wallet",
-        "category": "bar",
-        "subcategory": "alcohol",
-        "note": "beer",
-    },
-    {
-        "date": "2018-05-18",
-        "type": "expense",
-        "amount": -9.5,
-        "account": "N26",
-        "category": "transport",
-        "subcategory": "public transport",
-        "note": "bus",
-    },
-    {
-        "date": "2018-05-11",
-        "type": "expense",
-        "amount": -7.0,
-        "account": "Wallet",
-        "category": "bar",
-        "subcategory": "alcohol",
-        "note": "wine",
-    },
-    {
-        "date": "2018-05-18",
-        "type": "expense",
-        "amount": -9.5,
-        "account": "Wallet",
-        "category": "grocery",
-        "subcategory": "food",
-        "note": "penny",
-    },
-    {
-        "date": "2020-12-10",
-        "type": "expense",
-        "amount": -50.0,
-        "account": "N26",
-        "category": "banktransfer",
-        "subcategory": "",
-        "note": "to Wallet",
-    },
-    {
-        "date": "2020-12-16",
-        "type": "income",
-        "amount": 50.0,
-        "account": "C24",
-        "category": "banktransfer",
-        "subcategory": "",
-        "note": "from room",
-    },
-]
-EXAMPLE_METADATA = {
-    "accounts": ["N26", "C24", "Wallet"],
-    "categories": ["salary", "gift", "bar", "transport", "grocery", "banktransfer", ""],
-    "subcategories": ["food", "evotec", "family", "alcohol", "public transport", ""],
-}
+from .utils.dummy_data import EXAMPLE_DATA, EXAMPLE_METADATA
 
 DATA_CSV = "data.csv"
 METADATA_JSON = "metadata.json"
 
 
 def validate_input(item, item_list, item_type, mode="add"):
-    if mode != "add" and mode != "remove":
+    """Utility function validate the input before updating data.
+
+    - checks if item is correct type
+    - if mode "add" checks if item isn't already present in the list.
+    - if mode "remove" checks if item is present in the list.
+
+    Args:
+        item: item to check (e.g. str)
+        item_list (list): list of present items.
+        item_type (type): type of the item that is expected.
+        mode (str, optional): mode of the check. Defaults to "add".
+
+    Raises:
+        ValueError: Mode Error: Mode can only be 'add' or 'remove'
+        ValueError: Type Error: {item} is not type {item_type}
+        ValueError: Integrity Error: Item: {item} already exists!
+        ValueError: 404 Error: Item: {item} not found!
+    """
+    if mode not in {"add", "remove"}:
         raise ValueError("Mode Error: Mode can only be 'add' or 'remove'!")
 
     if not isinstance(item, item_type):
@@ -122,37 +60,61 @@ def validate_input(item, item_list, item_type, mode="add"):
 
 
 def is_used(item, key, my_dict_list):
+    """Utility function to check whether an item is currently used or not.
+
+    Args:
+        item: item to check.
+        key (str): dictionary key to use (e.g "category", "account",..).
+        my_dict_list (list): list of dictionaries (e.g. transactions, accounts)
+
+    Returns:
+        bool: if found it means it's in use.
+    """
     found = any(d.get(key) == item for d in my_dict_list)
     return found
 
 
 class DataManager:
+    """Data manager to handle the data loading, saving and updating."""
+
     def __init__(self, data_folder: str = "../data"):
-        # TODO check if it's a folder path
+        # TODO check if it's a folder path # pylint: disable=W0511
         self.data_folder = data_folder
-        # TODO collect all self variables and initialize to none
         self.balances = None
+        self.accounts = None
+        self.categories = None
+        self.sub_categories = None
+        self.transactions = None
+        self.metadata = None
 
     def initialize_data(self):
+        """Initialize all data, by either loading it or generating a dummy example."""
         if self.is_empty_data_folder():
             self.create_data_file()
 
         self.load_metadata()
         self.load_transactions()
         # if no data is found the files are populated with some example data
-        # TODO: for now all data is loaded -> if performance becomes a problem explore other solutions
+        # TODO: for now all data is loaded  # pylint: disable=W0511
+        # if performance becomes a problem explore other solutions
         self.accounts = self.metadata["accounts"]
         self.categories = self.metadata["categories"]
         self.sub_categories = self.metadata["subcategories"]
 
     def is_empty_data_folder(self):
+        """Utility function that checks if the data folder is empty.
+
+        Returns:
+            bool: checks if the data folder is empty.
+        """
         for file_name in os.listdir(self.data_folder):
-            # TODO manage case in which only one of the two files is present
-            if file_name == DATA_CSV or file_name == METADATA_JSON:
+            # TODO manage case in which only one of the two files is present # pylint: disable=W0511
+            if file_name in {DATA_CSV, METADATA_JSON}:
                 return False
         return True
 
     def create_data_file(self):
+        """Utility function that creates dummy data files."""
         csv_file_path = os.path.join(self.data_folder, DATA_CSV)
         json_file_path = os.path.join(self.data_folder, METADATA_JSON)
 
@@ -161,25 +123,42 @@ class DataManager:
 
         # Use the to_csv() method to export the DataFrame to a CSV file
         df.to_csv(csv_file_path, index=False)
-        with open(json_file_path, "w") as jsonfile:
+        with open(json_file_path, "w", encoding="utf8") as jsonfile:
             json.dump(EXAMPLE_METADATA, jsonfile, indent=4)
 
     def load_transactions(self):
+        """Load transactins from csv file."""
         data_df = self.load_csv()
         df_cleaned = data_df.fillna("")
 
         self.transactions = df_cleaned.to_dict(orient="records")
 
     def load_csv(self):
+        """Load csv data file.
+
+        Returns:
+            pandas.DataFrame: return a pandas dataframe of the csv file.
+        """
         data_df = pd.read_csv(os.path.join(self.data_folder, DATA_CSV))
         return data_df
 
     def load_metadata(self):
-        with open(os.path.join(self.data_folder, METADATA_JSON), "r") as file:
+        """Load metadata json file."""
+        with open(
+            os.path.join(self.data_folder, METADATA_JSON), "r", encoding="utf8"
+        ) as file:
             json_data = json.load(file)
         self.metadata = json_data
 
     def get_account_balance(self, account):
+        """Get the balance value of a certain account.
+
+        Args:
+            account (str): account name.
+
+        Returns:
+            float: balance value for the requested account.
+        """
         if self.balances is not None:
             if account in self.balances:
                 return self.balances[account]
@@ -189,6 +168,11 @@ class DataManager:
         return self.balances[account]
 
     def update_balance(self, account):
+        """update balances for each account.
+
+        Args:
+            account (str): account name.
+        """
         new_balance = 0
         if self.balances is None:
             self.balances = {}
@@ -200,16 +184,24 @@ class DataManager:
         self.balances[account] = round(new_balance, 2)
 
     def save_metadata(self):
-        # TODO keep last n version of a file
+        """save metadata in a json file."""
+        # TODO keep last n version of a file # pylint: disable=W0511
         # update metadata
         self.metadata["accounts"] = self.accounts
         self.metadata["categories"] = self.categories
         self.metadata["subcategories"] = self.sub_categories
 
-        with open(os.path.join(self.data_folder, METADATA_JSON), "w") as file:
+        with open(
+            os.path.join(self.data_folder, METADATA_JSON), "w", encoding="utf8"
+        ) as file:
             json.dump(self.metadata, file, indent=4)
 
     def add_category(self, category):
+        """Add a new category to the metadata.
+
+        Args:
+            category (str): category name.
+        """
         validate_input(
             item=category, item_list=self.categories, item_type=str, mode="add"
         )
@@ -221,6 +213,11 @@ class DataManager:
         self.save_metadata()
 
     def add_subcategory(self, subcategory):
+        """Add a new subcategory to the metadata.
+
+        Args:
+            subcategory (str): subcategory name.
+        """
         validate_input(
             item=subcategory, item_list=self.sub_categories, item_type=str, mode="add"
         )
@@ -232,6 +229,11 @@ class DataManager:
         self.save_metadata()
 
     def add_account(self, account):
+        """Add a new account to the metadata.
+
+        Args:
+            account (str): account name.
+        """
         validate_input(item=account, item_list=self.accounts, item_type=str, mode="add")
 
         # add category
@@ -241,6 +243,14 @@ class DataManager:
         self.save_metadata()
 
     def remove_category(self, category):
+        """Remove a category from the metadata.
+
+        Args:
+            category (str): category name.
+
+        Raises:
+            ValueError: If category is still used.
+        """
         validate_input(
             item=category, item_list=self.categories, item_type=str, mode="remove"
         )
@@ -256,6 +266,14 @@ class DataManager:
         self.save_metadata()
 
     def remove_subcategory(self, subcategory):
+        """Remove a subcategory from the metadata.
+
+        Args:
+            subcategory (str): subcategory name.
+
+        Raises:
+            ValueError: If subcategory is still used.
+        """
         validate_input(
             item=subcategory,
             item_list=self.sub_categories,
@@ -274,11 +292,18 @@ class DataManager:
         self.save_metadata()
 
     def remove_account(self, account):
+        """Remove a account from the metadata.
+
+        Args:
+            account (str): account name.
+
+        Raises:
+            ValueError: If account is still used.
+        """
         validate_input(
             item=account, item_list=self.accounts, item_type=str, mode="remove"
         )
 
-        # check if item is used
         # check if item is used
         if is_used(item=account, key="account", my_dict_list=self.transactions):
             raise ValueError(f"Integrity Error: Item: {account} is still in use!")

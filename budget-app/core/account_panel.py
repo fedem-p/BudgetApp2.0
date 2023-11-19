@@ -1,3 +1,4 @@
+"""Module to define the account page to insert in the bottom navbar of the app."""
 from kivymd.uix.bottomnavigation import MDBottomNavigationItem
 from kivymd.uix.list import (
     IconLeftWidget,
@@ -12,12 +13,23 @@ from .data_manager import DataManager
 
 
 class AccountPage:
+    """
+    Class to define the App page that holds all the accounts
+    and any functionality to add and remove accounts.
+    """
+
     def __init__(self, data_manager: DataManager):
         self.data_manager = data_manager
         self.accounts_list = MDList()
         self.accounts = self.data_manager.accounts
 
     def build_page(self):
+        """Builds a page using a bottom navbar item and
+        calls a function to generate the content of the page.
+
+        Returns:
+            MDBottomNavigationItem: Bottom navbar item.
+        """
         return MDBottomNavigationItem(
             self.generate_account_list(),
             name="accounts",
@@ -26,64 +38,107 @@ class AccountPage:
             badge_icon="numeric-3",
         )
 
-    def single_account_widget(self, account, txt):
+    def single_account_widget(self, account, description):
+        """Generate a single widget to hold account name and balance.
+
+        Args:
+            account (str): account name
+            description (str): account name and balance
+
+        Returns:
+            OneLineAvatarIconListItem: widget with icon, description and delete button.
+        """
         return OneLineAvatarIconListItem(
             IconLeftWidget(icon="bank"),
             IconRightWidget(
                 icon="delete",
-                on_release=lambda x, item=[account, txt]: self.delete_account(item),
+                on_release=lambda x, item=[account, description]: self.delete_account(
+                    item
+                ),
             ),
-            text=txt,
+            text=description,
         )
 
     def generate_account_list(self):
+        """Generate a list of widgets to hold each account name and balance.
+
+        Returns:
+            MDScrollView: list widget with all account names and balances.
+        """
         for account in self.accounts:
-            txt = f"{account} | Balance: {self.data_manager.get_account_balance(account=account)}$"
+            description = f"{account} |\
+                 Balance: {self.data_manager.get_account_balance(account=account)}$"
 
             self.accounts_list.add_widget(
-                self.single_account_widget(account=account, txt=txt)
+                self.single_account_widget(account=account, description=description)
             )
+        # add button to add a new account
         self.accounts_list.add_widget(
             OneLineAvatarIconListItem(
                 IconLeftWidget(icon="plus"),
                 text="Add a new account",
-                on_release=self.update_account_list,
+                on_release=self.get_new_account_name,
             )
         )
 
         return MDScrollView(self.accounts_list)
 
-    def update_account_list(self, instance):
+    def get_new_account_name(self, instance):
+        """Update list element to text input to accept new account name.
+
+        Args:
+            instance (widget signature): widget from which the click happened.
+        """
+        # initialize new input widget
         text_input = MDTextField(hint_text="Enter a new account")
         text_input.on_text_validate = lambda: self.add_new_account(
-            text_input, text_input.text
+            input_widget=text_input, account_name=text_input.text
         )
+        # remove button
         self.accounts_list.remove_widget(instance)
+        # add text input to collect new account name
         self.accounts_list.add_widget(text_input)
 
-    def add_new_account(self, text_input, text):
-        self.accounts_list.remove_widget(text_input)
-        self.data_manager.add_account(account=text)
-        txt = (
-            f"{text} | Balance: {self.data_manager.get_account_balance(account=text)}$"
+    def add_new_account(self, input_widget, account_name):
+        """Add new account element to the list of accounts.
+
+        Args:
+            input_widget (widget signature): widget that collected new input.
+            account_name (str): new account name.
+        """
+        # remove text input widget (not needed anymore)
+        self.accounts_list.remove_widget(input_widget)
+        # add new account to data manager
+        self.data_manager.add_account(account=account_name)
+        # define string to hold account name and balance
+        description = f"{account_name} |\
+             Balance: {self.data_manager.get_account_balance(account=account_name)}$"
+        # add account to list
+        self.accounts_list.add_widget(
+            self.single_account_widget(account=account_name, description=description)
         )
-        self.accounts_list.add_widget(self.single_account_widget(account=text, txt=txt))
+        # restore button to add new account
         self.accounts_list.add_widget(
             OneLineAvatarIconListItem(
                 IconLeftWidget(icon="plus"),
                 text="Add a new account",
-                on_release=self.update_account_list,
+                on_release=self.get_new_account_name,
             )
         )
 
     def delete_account(self, input_list):
+        """Delete account element from the list of accounts.
+
+        Args:
+            input_list (list): list of two elements: account name and description.
+        """
         account = input_list[0]
-        txt = input_list[1]
-        print(account)
-        print(txt)
+        description = input_list[1]
         # Remove the corresponding widget from the layout
         widget_to_remove = next(
-            widget for widget in self.accounts_list.children if widget.text == txt
+            widget
+            for widget in self.accounts_list.children
+            if widget.text == description
         )
         self.accounts_list.remove_widget(widget_to_remove)
         self.data_manager.remove_account(account=account)

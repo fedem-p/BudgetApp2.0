@@ -1,3 +1,4 @@
+"""Tests for the data manager module."""
 import os
 import sys
 
@@ -8,8 +9,8 @@ module_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # sys.path.append('../')
 sys.path.insert(0, module_directory)
-
-from core.data_manager import (
+# pylint: disable=C0116, W0621
+from core.data_manager import (  # pylint: disable=C0413,E0401
     DATA_CSV,
     EXAMPLE_DATA,
     EXAMPLE_METADATA,
@@ -23,6 +24,11 @@ TEST_FOLDER_PATH = "/tmp/tmp_empty_dir/"
 
 
 def clean_data(folder_path):
+    """Clean all data inside a folder.
+
+    Args:
+        folder_path (str): path to the folder.
+    """
     csv_file_path = os.path.join(folder_path, DATA_CSV)
     json_file_path = os.path.join(folder_path, METADATA_JSON)
 
@@ -34,6 +40,11 @@ def clean_data(folder_path):
 
 @pytest.fixture
 def create_empty_folder():
+    """Fixture to create an empty folder.
+
+    Yields:
+        str: folder path.
+    """
     empty_folder = TEST_FOLDER_PATH
     os.mkdir(empty_folder)
     yield empty_folder
@@ -43,13 +54,18 @@ def create_empty_folder():
 
 @pytest.fixture
 def create_full_folder(create_empty_folder):
+    """Fixture to create a folder with data files inside..
+
+    Yields:
+        str: folder path.
+    """
     folder = create_empty_folder
     csv_file_path = os.path.join(folder, DATA_CSV)
     json_file_path = os.path.join(folder, METADATA_JSON)
 
-    with open(csv_file_path, "w"):
+    with open(csv_file_path, "w", encoding="utf8"):
         pass
-    with open(json_file_path, "w"):
+    with open(json_file_path, "w", encoding="utf8"):
         pass
 
     yield folder
@@ -59,13 +75,13 @@ def create_full_folder(create_empty_folder):
 def test_is_empty_data_folder_true(create_empty_folder):
     new_manager = DataManager(data_folder=create_empty_folder)
 
-    assert new_manager.is_empty_data_folder() == True
+    assert new_manager.is_empty_data_folder() is True
 
 
 def test_is_empty_data_folder_false(create_full_folder):
     new_manager = DataManager(data_folder=create_full_folder)
 
-    assert new_manager.is_empty_data_folder() == False
+    assert new_manager.is_empty_data_folder() is False
 
 
 def test_create_data_file(create_empty_folder):
@@ -77,7 +93,7 @@ def test_create_data_file(create_empty_folder):
 
 
 @pytest.mark.skip
-# TODO fix test
+# TODO fix test # pylint: disable=W0511
 def test_load_csv(create_empty_folder):
     new_manager = DataManager(data_folder=create_empty_folder)
 
@@ -182,7 +198,7 @@ def test_get_account_balance_update(create_empty_folder):
         ),
     ],
 )
-def test_validate_input(
+def test_validate_input(  # pylint: disable=R0913
     item, item_list, item_type, mode, expected_exception, expected_message
 ):
     if expected_exception:
