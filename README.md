@@ -35,6 +35,12 @@ To run the tests you can use poetry again:
 poetry run pytest -s
 ```
 
+If you want to run the tests with coverage:
+
+```bash
+poetry run pytest --cov
+```
+
 ## Linting
 
 You can lint the code running `black`, `isort` and `pylint`:
