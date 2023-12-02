@@ -3,7 +3,6 @@ import os
 
 from kivymd.app import MDApp
 from kivymd.uix.bottomnavigation import MDBottomNavigation
-from kivymd.uix.button import MDFloatingActionButton
 from kivymd.uix.screen import MDScreen
 
 from core.account_panel import AccountPage

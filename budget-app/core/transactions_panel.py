@@ -1,5 +1,7 @@
 """Module to define the transaction page to insert in the bottom navbar of the app."""
+from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.bottomnavigation import MDBottomNavigationItem
+from kivymd.uix.button import MDFloatingActionButton
 from kivymd.uix.list import MDList, OneLineListItem
 from kivymd.uix.scrollview import MDScrollView
 
@@ -16,6 +18,7 @@ class TransactionPage:
         self.data_manager = data_manager
         self.transaction_list = MDList()
         self.transactions = self.data_manager.transactions
+        self.base = BoxLayout()
 
     def build_page(self):
         """Builds a page using a bottom navbar item and
@@ -24,8 +27,12 @@ class TransactionPage:
         Returns:
             MDBottomNavigationItem: Bottom navbar item.
         """
+        self.base.add_widget(self.generate_transactions_list())
+        self.base.add_widget(
+            MDFloatingActionButton(icon="plus", pos_hint={"right": 1, "bottom": 1})
+        )
         return MDBottomNavigationItem(
-            self.generate_transactions_list(),
+            self.base,
             name="transactions",
             text="Transactions",
             icon="format-list-bulleted",

@@ -123,7 +123,7 @@ class AccountPage:
         self.accounts_list.remove_widget(widget_to_remove)
         self.data_manager.remove_account(account=account)
 
-    def get_dialog_text_input(self, instance):
+    def get_dialog_text_input(self, instance):  # pylint: disable=W0613
         """Opens Pop-up box with a text field to insert new account name."""
 
         if not self.dialog:
