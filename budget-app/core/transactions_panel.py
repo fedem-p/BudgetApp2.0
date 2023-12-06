@@ -1,4 +1,6 @@
 """Module to define the transaction page to insert in the bottom navbar of the app."""
+import logging
+import time
 from datetime import datetime
 
 from kivy.uix.boxlayout import BoxLayout
@@ -17,6 +19,8 @@ from kivymd.uix.textfield import MDTextField
 from .data_manager import DataManager
 from .utils.dialogbox import DialogBuilder
 
+logger = logging.getLogger(__name__)
+
 
 class TransactionPage:
     """
@@ -25,6 +29,7 @@ class TransactionPage:
     """
 
     def __init__(self, data_manager: DataManager):
+        logger.info("TransactionPage: %s:  __init__", time.time())
         self.data_manager = data_manager
         self.transaction_list = MDList()
         self.transactions = self.data_manager.transactions
@@ -38,6 +43,7 @@ class TransactionPage:
         Returns:
             MDBottomNavigationItem: Bottom navbar item.
         """
+        logger.info("TransactionPage: %s:  build_page", time.time())
         self.base.add_widget(self.generate_transactions_list())
         # pylint: disable=R0801
         self.base.add_widget(  # pylint: disable=R0801
@@ -62,6 +68,7 @@ class TransactionPage:
         Returns:
             MDScrollView: List of widget with transactions information.
         """
+        logger.info("TransactionPage: %s:  generate_transactions_list", time.time())
         for transaction in self.transactions:
             self.transaction_list.add_widget(
                 self.single_transaction_widget(transaction=transaction)
@@ -77,6 +84,7 @@ class TransactionPage:
         Returns:
             OneLineAvatarIconListItem: widget with icon, details and delete button.
         """
+        logger.info("TransactionPage: %s:  single_transaction_widget", time.time())
         description = f"Date:        {transaction['date']},\
                     Type:        {transaction['type']},\
                     Amount:      {transaction['amount']}$,\
@@ -103,6 +111,7 @@ class TransactionPage:
         Args:
             input_list (list): list of two elements: transaction dict and description.
         """
+        logger.info("TransactionPage: %s:  delete_transaction", time.time())
         transaction = input_list[0]
         description = input_list[1]
         # Remove the corresponding widget from the layout
@@ -120,6 +129,7 @@ class TransactionPage:
         Args:
             transaction (dict): new transaction dict.
         """
+        logger.info("TransactionPage: %s:  add_new_transaction", time.time())
         transaction = {
             "date": box.ids["date"].text,
             "type": box.ids["type"].text,
@@ -141,7 +151,7 @@ class TransactionPage:
 
     def get_dialog_text_input(self, instance):  # pylint: disable=W0613
         """Opens Pop-up box with a text field to insert new transaction name."""
-
+        logger.info("TransactionPage: %s:  get_dialog_text_input", time.time())
         if not self.dialog:
             # create text input
             date_input = MDTextField(

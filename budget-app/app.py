@@ -1,5 +1,7 @@
 """Budget app to track expenses and income."""
+import logging
 import os
+import time
 
 from kivymd.app import MDApp
 from kivymd.uix.bottomnavigation import MDBottomNavigation
@@ -13,11 +15,15 @@ from core.transactions_panel import TransactionPage
 
 DATA_PATH = os.path.abspath("./data/")
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 
 class MyBudgetApp(MDApp):
     """Creates an app to track expenses and income."""
 
     def build(self):
+        logger.info("App: %s:  build", time.time())
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Orange"
         self.theme_cls.material_style = "M2"
@@ -47,6 +53,7 @@ class MyBudgetApp(MDApp):
         Returns:
             MDScreen: screen with a bottom navbar and multiple pages.
         """
+        logger.info("App: %s:  build_main_screen", time.time())
         navbar = MDBottomNavigation(
             self.overview_page.build_page(),
             self.account_page.build_page(),
@@ -60,4 +67,5 @@ class MyBudgetApp(MDApp):
 
 
 if __name__ == "__main__":
+    logger.info("App: %s:  Start app", time.time())
     MyBudgetApp().run()
