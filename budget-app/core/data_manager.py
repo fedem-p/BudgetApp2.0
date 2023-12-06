@@ -16,6 +16,7 @@ operations:
 
 import json
 import os
+from datetime import datetime
 
 import pandas as pd
 
@@ -196,6 +197,16 @@ class DataManager:
         ) as file:
             json.dump(self.metadata, file, indent=4)
 
+    def save_transactions(self):
+        """save transactions in a csv file."""
+        # TODO keep last n version of a file # pylint: disable=W0511
+        csv_file_path = os.path.join(self.data_folder, DATA_CSV)
+        # Convert the list of dictionaries to a DataFrame
+        df = pd.DataFrame(self.transactions)
+
+        # Use the to_csv() method to export the DataFrame to a CSV file
+        df.to_csv(csv_file_path, index=False)
+
     def add_category(self, category):
         """Add a new category to the metadata.
 
@@ -242,6 +253,26 @@ class DataManager:
         # save new metadata
         self.save_metadata()
 
+    def add_transaction(self, transaction):
+        """Add a new transaction to the data.
+
+        Args:
+            transaction (dict): transaction dict.
+        """
+        validate_input(
+            item=transaction, item_list=self.transactions, item_type=dict, mode="add"
+        )
+
+        self.validate_transaction(item=transaction)
+
+        transaction["amount"] = int(transaction["amount"])
+
+        # add category
+        self.transactions.append(transaction)
+
+        # save new metadata
+        self.save_transactions()
+
     def remove_category(self, category):
         """Remove a category from the metadata.
 
@@ -259,7 +290,7 @@ class DataManager:
         if is_used(item=category, key="category", my_dict_list=self.transactions):
             raise ValueError(f"Integrity Error: Item: {category} is still in use!")
 
-        # add category
+        # remove category
         self.categories.remove(category)
 
         # save new metadata
@@ -285,7 +316,7 @@ class DataManager:
         if is_used(item=subcategory, key="subcategory", my_dict_list=self.transactions):
             raise ValueError(f"Integrity Error: Item: {subcategory} is still in use!")
 
-        # add category
+        # remove subcategory
         self.sub_categories.remove(subcategory)
 
         # save new metadata
@@ -308,8 +339,79 @@ class DataManager:
         if is_used(item=account, key="account", my_dict_list=self.transactions):
             raise ValueError(f"Integrity Error: Item: {account} is still in use!")
 
-        # add category
+        # remove account
         self.accounts.remove(account)
 
         # save new metadata
         self.save_metadata()
+
+    def remove_transaction(self, transaction):
+        """Remove a transaction to the data.
+
+        Args:
+            transaction (dict): transaction dict.
+        """
+        validate_input(
+            item=transaction, item_list=self.transactions, item_type=dict, mode="remove"
+        )
+
+        # remove transaction
+        self.transactions.remove(transaction)
+
+        # save new metadata
+        self.save_transactions()
+
+    def validate_transaction(self, item):
+        """validate a transaction fields.
+
+        Args:
+            item (dict): transaction
+
+        Raises:
+            ValueError: Error for each field based on its value.
+        """
+        sample_transaction_keys = {
+            "date",
+            "type",
+            "amount",
+            "account",
+            "category",
+            "subcategory",
+            "note",
+        }
+
+        if sample_transaction_keys != item.keys():
+            raise ValueError("Transaction Error: dict key missing or extra.")
+
+        if item["type"] not in {"income", "expense", "transfer"}: # pylint: disable=raise-missing-from
+            raise ValueError( 
+                f"Transaction Error: Unknown transaction type: {item['type']}."
+            )
+
+        try:
+            _ = int(item["amount"])
+        except ValueError:
+            raise ValueError(
+                f"Transaction Error: Amount must be float or int: {item['amount']}"
+            )
+
+        if int(item["amount"]) < 0:
+            raise ValueError(
+                f"Transaction Error: Amount must be a positive number: {item['amount']}"
+            )
+
+        for key, value in {
+            "account": self.accounts,
+            "category": self.categories,
+            "subcategory": self.sub_categories,
+        }.items(): # pylint: disable=raise-missing-from
+            if item[key] not in value:
+                raise ValueError(f"Transaction Error: Unknown {key}:{item[key]}.")
+
+        date_format = "%Y/%m/%d"
+        try:
+            datetime.strptime(item["date"], date_format)
+        except ValueError:
+            raise ValueError(
+                f"Transaction Error: Invalid date format. Must be in {date_format}."
+            )
