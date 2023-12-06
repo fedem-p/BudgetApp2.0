@@ -4,8 +4,7 @@ from datetime import datetime
 from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.bottomnavigation import MDBottomNavigationItem
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton, MDFloatingActionButton
-from kivymd.uix.dialog import MDDialog
+from kivymd.uix.button import MDFloatingActionButton
 from kivymd.uix.list import (
     IconLeftWidget,
     IconRightWidget,
@@ -16,6 +15,7 @@ from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.textfield import MDTextField
 
 from .data_manager import DataManager
+from .utils.dialogbox import DialogBuilder
 
 
 class TransactionPage:
@@ -39,13 +39,15 @@ class TransactionPage:
             MDBottomNavigationItem: Bottom navbar item.
         """
         self.base.add_widget(self.generate_transactions_list())
-        self.base.add_widget(
+        # pylint: disable=R0801
+        self.base.add_widget(  # pylint: disable=R0801
             MDFloatingActionButton(
                 icon="plus",
                 pos_hint={"right": 1, "bottom": 1},
                 on_release=self.get_dialog_text_input,
             )
         )
+        # pylint: enable=R0801
         return MDBottomNavigationItem(
             self.base,
             name="transactions",
@@ -182,21 +184,10 @@ class TransactionPage:
             )
 
             # create dialog button
-            self.dialog = MDDialog(
-                title="Add new Transaction:",
-                type="custom",
-                content_cls=my_box,
-                buttons=[
-                    MDFlatButton(
-                        text="CANCEL", on_release=lambda x: self.dialog.dismiss()
-                    ),
-                    MDFlatButton(
-                        text="Save",
-                        on_release=lambda x, item=my_box: self.add_new_transaction(
-                            box=item
-                        ),
-                    ),
-                ],
+            self.dialog = DialogBuilder().build_dialog(
+                title="Add new Account:",
+                content=my_box,
+                on_release_function=self.add_new_transaction,
             )
 
         self.dialog.open()

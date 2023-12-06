@@ -1,8 +1,7 @@
 """Module to define the account page to insert in the bottom navbar of the app."""
 from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.bottomnavigation import MDBottomNavigationItem
-from kivymd.uix.button import MDFlatButton, MDFloatingActionButton
-from kivymd.uix.dialog import MDDialog
+from kivymd.uix.button import MDFloatingActionButton
 from kivymd.uix.list import (
     IconLeftWidget,
     IconRightWidget,
@@ -13,6 +12,7 @@ from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.textfield import MDTextField
 
 from .data_manager import DataManager
+from .utils.dialogbox import DialogBuilder
 
 
 class AccountPage:
@@ -94,6 +94,9 @@ class AccountPage:
         Args:
             account_name (str): new account name.
         """
+        print(account_name)
+        print(account_name.text)
+        account_name = account_name.text
         # add new account to data manager
         self.data_manager.add_account(account=account_name)
         # define string to hold account name and balance
@@ -130,21 +133,10 @@ class AccountPage:
             # create text input
             text_input = MDTextField(hint_text="Enter a new account")
             # create dialog button
-            self.dialog = MDDialog(
+            self.dialog = DialogBuilder().build_dialog(
                 title="Add new Account:",
-                type="custom",
-                content_cls=text_input,
-                buttons=[
-                    MDFlatButton(
-                        text="CANCEL", on_release=lambda x: self.dialog.dismiss()
-                    ),
-                    MDFlatButton(
-                        text="Save",
-                        on_release=lambda x, item=text_input: self.add_new_account(
-                            account_name=item.text
-                        ),
-                    ),
-                ],
+                content=text_input,
+                on_release_function=self.add_new_account,
             )
 
         self.dialog.open()
