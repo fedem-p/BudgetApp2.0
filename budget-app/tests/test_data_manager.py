@@ -179,6 +179,22 @@ def test_get_account_balance_update(create_empty_folder):
         ),
         (4, [1, 2, 3], int, "add", None, None),
         (2, [1, 2, 3], int, "remove", None, None),
+        (
+            {"test": 4},
+            [{"test3": 1}, {"test2": 2}, {"test1": 3}],
+            dict,
+            "add",
+            None,
+            None,
+        ),
+        (
+            {"test2": 2},
+            [{"test3": 1}, {"test2": 2}, {"test1": 3}],
+            dict,
+            "remove",
+            None,
+            None,
+        ),
         (4, [1, 2, 3], int, "remove", ValueError, "404 Error: Item: 4 not found!"),
         (
             2,
@@ -354,3 +370,194 @@ def test_add_remove_account(create_empty_folder):
     new_manager.remove_account(account=item)
 
     assert item not in new_manager.accounts
+
+
+def test_add_remove_transaction(create_empty_folder):
+    new_manager = DataManager(data_folder=create_empty_folder)
+    # create data
+    new_manager.initialize_data()
+
+    item = {
+        "date": "2118/01/03",
+        "type": "expense",
+        "amount": 999.0,
+        "account": "N26",
+        "category": "salary",
+        "subcategory": "family",
+        "note": "may",
+    }
+
+    fake_item = {
+        "date": "2119-01-03",
+        "type": "expense",
+        "amount": 999.0,
+        "account": "N26",
+        "category": "salary",
+        "subcategory": "family",
+        "note": "may",
+    }
+
+    new_manager.add_transaction(transaction=item)
+
+    assert item in new_manager.transactions
+
+    with pytest.raises(ValueError):
+        new_manager.add_transaction(transaction=item)
+
+    with pytest.raises(ValueError):
+        new_manager.add_transaction(transaction=9)
+
+    with pytest.raises(ValueError):
+        new_manager.remove_transaction(transaction=fake_item)
+
+    new_manager.remove_transaction(transaction=item)
+
+    assert item not in new_manager.accounts
+
+
+@pytest.mark.parametrize(
+    "item, expected_exception",
+    [
+        (
+            {
+                "date": "2018/01/03",
+                "type": "income",
+                "amount": 94.0,
+                "account": "N26",
+                "category": "salary",
+                "subcategory": "evotec",
+                "note": "may",
+            },
+            None,
+        ),
+        (
+            {
+                "date": "2018/01/03",
+                "type": "income",
+                "account": "N26",
+                "category": "salary",
+                "subcategory": "evotec",
+                "note": "may",
+            },
+            ValueError,
+        ),
+        (
+            {
+                "date": "2018/01/03",
+                "type": "invalid_type",
+                "amount": 94.0,
+                "account": "N26",
+                "category": "salary",
+                "subcategory": "evotec",
+                "note": "may",
+            },
+            ValueError,
+        ),
+        (
+            {
+                "date": "2018/01/03",
+                "type": "income",
+                "amount": "invalid_amount",
+                "account": "N26",
+                "category": "salary",
+                "subcategory": "evotec",
+                "note": "may",
+            },
+            ValueError,
+        ),
+        (
+            {
+                "date": "2018/01/03",
+                "type": "income",
+                "amount": -94.0,
+                "account": "N26",
+                "category": "salary",
+                "subcategory": "evotec",
+                "note": "may",
+            },
+            ValueError,
+        ),
+        (
+            {
+                "date": "2018/01/03",
+                "type": "income",
+                "amount": 94.0,
+                "account": "Unknown_Account",
+                "category": "salary",
+                "subcategory": "evotec",
+                "note": "may",
+            },
+            ValueError,
+        ),
+        (
+            {
+                "date": "01-03-2018",
+                "type": "income",
+                "amount": 94.0,
+                "account": "N26",
+                "category": "salary",
+                "subcategory": "evotec",
+                "note": "may",
+            },
+            ValueError,
+        ),
+    ],
+)
+def test_validate_transaction(create_empty_folder, item, expected_exception):
+    new_manager = DataManager(data_folder=create_empty_folder)
+    # create data
+    new_manager.initialize_data()
+    if expected_exception is not None:
+        with pytest.raises(expected_exception):
+            new_manager.validate_transaction(item)
+    else:
+        assert new_manager.validate_transaction(item) is None
+
+
+def test_save_transactions(create_empty_folder):
+    new_manager = DataManager(data_folder=create_empty_folder)
+    # create data
+    new_manager.initialize_data()
+
+    test_transaction = {
+        "date": "2118/01/02",
+        "type": "income",
+        "amount": 39.48,
+        "account": "Wallet",
+        "category": "gift",
+        "subcategory": "family",
+        "note": "christmas",
+    }
+
+    # update transaction locally
+    new_manager.transactions.append(test_transaction)
+
+    # save transaction
+    new_manager.save_transactions()
+
+    # load transaction
+    new_manager.load_transactions()
+
+    # check if new transaction is added
+    assert test_transaction in new_manager.transactions
+
+    # remove transaction
+    new_manager.transactions.remove(test_transaction)
+
+    # don't save
+    new_manager.initialize_data()  # init to restore list values
+
+    # check if new transaction is added
+    assert test_transaction in new_manager.transactions
+
+    # remove transaction
+    new_manager.transactions.remove(test_transaction)
+
+    # save transaction
+    new_manager.save_transactions()
+
+    # load transaction
+    new_manager.load_transactions()
+
+    # check if new transaction is removed
+    assert test_transaction not in new_manager.transactions
