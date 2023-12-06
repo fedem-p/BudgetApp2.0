@@ -1,5 +1,7 @@
 """Module to define the account page to insert in the bottom navbar of the app."""
+from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.bottomnavigation import MDBottomNavigationItem
+from kivymd.uix.button import MDFloatingActionButton
 from kivymd.uix.list import (
     IconLeftWidget,
     IconRightWidget,
@@ -10,6 +12,7 @@ from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.textfield import MDTextField
 
 from .data_manager import DataManager
+from .utils.dialogbox import DialogBuilder
 
 
 class AccountPage:
@@ -22,6 +25,8 @@ class AccountPage:
         self.data_manager = data_manager
         self.accounts_list = MDList()
         self.accounts = self.data_manager.accounts
+        self.base = BoxLayout()
+        self.dialog = None
 
     def build_page(self):
         """Builds a page using a bottom navbar item and
@@ -30,8 +35,16 @@ class AccountPage:
         Returns:
             MDBottomNavigationItem: Bottom navbar item.
         """
+        self.base.add_widget(self.generate_account_list())
+        self.base.add_widget(
+            MDFloatingActionButton(
+                icon="plus",
+                pos_hint={"right": 1, "bottom": 1},
+                on_release=self.get_dialog_text_input,
+            )
+        )
         return MDBottomNavigationItem(
-            self.generate_account_list(),
+            self.base,
             name="accounts",
             text="Accounts",
             icon="bank",
@@ -72,42 +85,18 @@ class AccountPage:
             self.accounts_list.add_widget(
                 self.single_account_widget(account=account, description=description)
             )
-        # add button to add a new account
-        self.accounts_list.add_widget(
-            OneLineAvatarIconListItem(
-                IconLeftWidget(icon="plus"),
-                text="Add a new account",
-                on_release=self.get_new_account_name,
-            )
-        )
 
         return MDScrollView(self.accounts_list)
 
-    def get_new_account_name(self, instance):
-        """Update list element to text input to accept new account name.
-
-        Args:
-            instance (widget signature): widget from which the click happened.
-        """
-        # initialize new input widget
-        text_input = MDTextField(hint_text="Enter a new account")
-        text_input.on_text_validate = lambda: self.add_new_account(
-            input_widget=text_input, account_name=text_input.text
-        )
-        # remove button
-        self.accounts_list.remove_widget(instance)
-        # add text input to collect new account name
-        self.accounts_list.add_widget(text_input)
-
-    def add_new_account(self, input_widget, account_name):
+    def add_new_account(self, account_name):
         """Add new account element to the list of accounts.
 
         Args:
-            input_widget (widget signature): widget that collected new input.
             account_name (str): new account name.
         """
-        # remove text input widget (not needed anymore)
-        self.accounts_list.remove_widget(input_widget)
+        print(account_name)
+        print(account_name.text)
+        account_name = account_name.text
         # add new account to data manager
         self.data_manager.add_account(account=account_name)
         # define string to hold account name and balance
@@ -117,14 +106,8 @@ class AccountPage:
         self.accounts_list.add_widget(
             self.single_account_widget(account=account_name, description=description)
         )
-        # restore button to add new account
-        self.accounts_list.add_widget(
-            OneLineAvatarIconListItem(
-                IconLeftWidget(icon="plus"),
-                text="Add a new account",
-                on_release=self.get_new_account_name,
-            )
-        )
+        # dismiss input dialog
+        self.dialog.dismiss()
 
     def delete_account(self, input_list):
         """Delete account element from the list of accounts.
@@ -142,3 +125,18 @@ class AccountPage:
         )
         self.accounts_list.remove_widget(widget_to_remove)
         self.data_manager.remove_account(account=account)
+
+    def get_dialog_text_input(self, instance):  # pylint: disable=W0613
+        """Opens Pop-up box with a text field to insert new account name."""
+
+        if not self.dialog:
+            # create text input
+            text_input = MDTextField(hint_text="Enter a new account")
+            # create dialog button
+            self.dialog = DialogBuilder().build_dialog(
+                title="Add new Account:",
+                content=text_input,
+                on_release_function=self.add_new_account,
+            )
+
+        self.dialog.open()

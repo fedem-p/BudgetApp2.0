@@ -16,60 +16,7 @@ from core.data_manager import (  # pylint: disable=C0413,E0401
     EXAMPLE_METADATA,
     METADATA_JSON,
     DataManager,
-    is_used,
-    validate_input,
 )
-
-TEST_FOLDER_PATH = "/tmp/tmp_empty_dir/"
-
-
-def clean_data(folder_path):
-    """Clean all data inside a folder.
-
-    Args:
-        folder_path (str): path to the folder.
-    """
-    csv_file_path = os.path.join(folder_path, DATA_CSV)
-    json_file_path = os.path.join(folder_path, METADATA_JSON)
-
-    if os.path.exists(json_file_path):
-        os.remove(json_file_path)
-    if os.path.exists(csv_file_path):
-        os.remove(csv_file_path)
-
-
-@pytest.fixture
-def create_empty_folder():
-    """Fixture to create an empty folder.
-
-    Yields:
-        str: folder path.
-    """
-    empty_folder = TEST_FOLDER_PATH
-    os.mkdir(empty_folder)
-    yield empty_folder
-    clean_data(folder_path=empty_folder)
-    os.rmdir(empty_folder)
-
-
-@pytest.fixture
-def create_full_folder(create_empty_folder):
-    """Fixture to create a folder with data files inside..
-
-    Yields:
-        str: folder path.
-    """
-    folder = create_empty_folder
-    csv_file_path = os.path.join(folder, DATA_CSV)
-    json_file_path = os.path.join(folder, METADATA_JSON)
-
-    with open(csv_file_path, "w", encoding="utf8"):
-        pass
-    with open(json_file_path, "w", encoding="utf8"):
-        pass
-
-    yield folder
-    clean_data(folder_path=folder)
 
 
 def test_is_empty_data_folder_true(create_empty_folder):
@@ -164,64 +111,6 @@ def test_get_account_balance_update(create_empty_folder):
     assert new_manager.get_account_balance(account="N26") == round(34.5, 2)
     assert new_manager.get_account_balance(account="C24") == round(50.00, 2)
     assert new_manager.get_account_balance(account="Wallet") == round(15.98, 2)
-
-
-@pytest.mark.parametrize(
-    "item, item_list, item_type, mode, expected_exception, expected_message",
-    [
-        (
-            2,
-            [1, 2, 3],
-            int,
-            "add",
-            ValueError,
-            "Integrity Error: Item: 2 already exists!",
-        ),
-        (4, [1, 2, 3], int, "add", None, None),
-        (2, [1, 2, 3], int, "remove", None, None),
-        (4, [1, 2, 3], int, "remove", ValueError, "404 Error: Item: 4 not found!"),
-        (
-            2,
-            [1, 2, 3],
-            int,
-            "invalid",
-            ValueError,
-            "Mode Error: Mode can only be 'add' or 'remove'!",
-        ),
-        (
-            2,
-            [1, 2, 3],
-            str,
-            "add",
-            ValueError,
-            "Type Error: 2 is not type <class 'str'>",
-        ),
-    ],
-)
-def test_validate_input(  # pylint: disable=R0913
-    item, item_list, item_type, mode, expected_exception, expected_message
-):
-    if expected_exception:
-        with pytest.raises(expected_exception, match=expected_message):
-            validate_input(item, item_list, item_type, mode)
-    else:
-        validate_input(item, item_list, item_type, mode)
-
-
-@pytest.mark.parametrize(
-    "item, key, my_dict_list, expected_result",
-    [
-        (2, "key", [{"key": 1, "value": "A"}, {"key": 2, "value": "B"}], True),
-        (3, "key", [{"key": 1, "value": "A"}, {"key": 2, "value": "B"}], False),
-        ("A", "value", [{"key": 1, "value": "A"}, {"key": 2, "value": "B"}], True),
-        ("C", "value", [{"key": 1, "value": "A"}, {"key": 2, "value": "B"}], False),
-        (None, "key", [{"key": 1, "value": "A"}, {"key": None, "value": "B"}], True),
-        (None, "value", [{"key": 1, "value": "A"}, {"key": 2, "value": None}], True),
-    ],
-)
-def test_is_used(item, key, my_dict_list, expected_result):
-    result = is_used(item, key, my_dict_list)
-    assert result == expected_result
 
 
 def test_save_metadata(create_empty_folder):
@@ -354,3 +243,95 @@ def test_add_remove_account(create_empty_folder):
     new_manager.remove_account(account=item)
 
     assert item not in new_manager.accounts
+
+
+def test_add_remove_transaction(create_empty_folder):
+    new_manager = DataManager(data_folder=create_empty_folder)
+    # create data
+    new_manager.initialize_data()
+
+    item = {
+        "date": "2118/01/03",
+        "type": "expense",
+        "amount": 999.0,
+        "account": "N26",
+        "category": "salary",
+        "subcategory": "family",
+        "note": "may",
+    }
+
+    fake_item = {
+        "date": "2119-01-03",
+        "type": "expense",
+        "amount": 999.0,
+        "account": "N26",
+        "category": "salary",
+        "subcategory": "family",
+        "note": "may",
+    }
+
+    new_manager.add_transaction(transaction=item)
+
+    assert item in new_manager.transactions
+
+    with pytest.raises(ValueError):
+        new_manager.add_transaction(transaction=item)
+
+    with pytest.raises(ValueError):
+        new_manager.add_transaction(transaction=9)
+
+    with pytest.raises(ValueError):
+        new_manager.remove_transaction(transaction=fake_item)
+
+    new_manager.remove_transaction(transaction=item)
+
+    assert item not in new_manager.accounts
+
+
+def test_save_transactions(create_empty_folder):
+    new_manager = DataManager(data_folder=create_empty_folder)
+    # create data
+    new_manager.initialize_data()
+
+    test_transaction = {
+        "date": "2118/01/02",
+        "type": "expense",
+        "amount": 39.48,
+        "account": "Wallet",
+        "category": "bar",
+        "subcategory": "food",
+        "note": "christmas",
+    }
+
+    # update transaction locally
+    new_manager.transactions.append(test_transaction)
+
+    # save transaction
+    new_manager.save_transactions()
+
+    # load transaction
+    new_manager.load_transactions()
+
+    # check if new transaction is added
+    assert test_transaction in new_manager.transactions
+
+    # remove transaction
+    new_manager.transactions.remove(test_transaction)
+
+    # don't save
+    new_manager.initialize_data()  # init to restore list values
+
+    # check if new transaction is added
+    assert test_transaction in new_manager.transactions
+
+    # remove transaction
+    new_manager.transactions.remove(test_transaction)
+
+    # save transaction
+    new_manager.save_transactions()
+
+    # load transaction
+    new_manager.load_transactions()
+
+    # check if new transaction is removed
+    assert test_transaction not in new_manager.transactions

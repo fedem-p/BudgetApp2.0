@@ -3,7 +3,6 @@ import os
 
 from kivymd.app import MDApp
 from kivymd.uix.bottomnavigation import MDBottomNavigation
-from kivymd.uix.button import MDFloatingActionButton
 from kivymd.uix.screen import MDScreen
 
 from core.account_panel import AccountPage
@@ -21,7 +20,7 @@ class MyBudgetApp(MDApp):
     def build(self):
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Orange"
-        self.theme_cls.material_style = "M3"
+        self.theme_cls.material_style = "M2"
 
         self.data_manager = DataManager(data_folder=DATA_PATH)  # pylint: disable=W0201
 
@@ -57,15 +56,7 @@ class MyBudgetApp(MDApp):
             text_color_active="lightgrey",
         )
 
-        return MDScreen(
-            navbar,
-            MDFloatingActionButton(
-                icon="plus",
-                # TODO: put them in the bottom left corner symmetrically (based on window size) # pylint: disable=W0511
-                pos=(0, navbar.height + 5),
-                pos_hint={"right": 0.99},
-            ),
-        )
+        return MDScreen(navbar)
 
 
 if __name__ == "__main__":
