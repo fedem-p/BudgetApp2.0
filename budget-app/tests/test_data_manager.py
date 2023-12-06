@@ -521,11 +521,11 @@ def test_save_transactions(create_empty_folder):
 
     test_transaction = {
         "date": "2118/01/02",
-        "type": "income",
+        "type": "expense",
         "amount": 39.48,
         "account": "Wallet",
-        "category": "gift",
-        "subcategory": "family",
+        "category": "bar",
+        "subcategory": "food",
         "note": "christmas",
     }
 

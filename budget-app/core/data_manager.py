@@ -383,15 +383,19 @@ class DataManager:
         if sample_transaction_keys != item.keys():
             raise ValueError("Transaction Error: dict key missing or extra.")
 
-        if item["type"] not in {"income", "expense", "transfer"}: # pylint: disable=raise-missing-from
-            raise ValueError( 
+        if item["type"] not in {
+            "income",
+            "expense",
+            "transfer",
+        }:  # pylint: disable=raise-missing-from
+            raise ValueError(
                 f"Transaction Error: Unknown transaction type: {item['type']}."
             )
 
         try:
             _ = int(item["amount"])
         except ValueError:
-            raise ValueError(
+            raise ValueError(  # pylint: disable=raise-missing-from
                 f"Transaction Error: Amount must be float or int: {item['amount']}"
             )
 
@@ -404,7 +408,7 @@ class DataManager:
             "account": self.accounts,
             "category": self.categories,
             "subcategory": self.sub_categories,
-        }.items(): # pylint: disable=raise-missing-from
+        }.items():  # pylint: disable=raise-missing-from
             if item[key] not in value:
                 raise ValueError(f"Transaction Error: Unknown {key}:{item[key]}.")
 
@@ -412,6 +416,6 @@ class DataManager:
         try:
             datetime.strptime(item["date"], date_format)
         except ValueError:
-            raise ValueError(
+            raise ValueError(  # pylint: disable=raise-missing-from
                 f"Transaction Error: Invalid date format. Must be in {date_format}."
             )
