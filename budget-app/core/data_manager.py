@@ -15,7 +15,9 @@ operations:
 """
 
 import json
+import logging
 import os
+import time
 
 import pandas as pd
 
@@ -25,11 +27,14 @@ from .utils.validator import is_used, validate_input, validate_transaction
 DATA_CSV = "data.csv"
 METADATA_JSON = "metadata.json"
 
+logger = logging.getLogger(__name__)
+
 
 class DataManager:
     """Data manager to handle the data loading, saving and updating."""
 
     def __init__(self, data_folder: str = "../data"):
+        logger.info("DataManager: %s:  Init", time.time())
         # TODO check if it's a folder path # pylint: disable=W0511
         self.data_folder = data_folder
         self.balances = None
@@ -41,6 +46,7 @@ class DataManager:
 
     def initialize_data(self):
         """Initialize all data, by either loading it or generating a dummy example."""
+        logger.info("DataManager: %s:  Init data", time.time())
         if self.is_empty_data_folder():
             self.create_data_file()
 
@@ -55,6 +61,7 @@ class DataManager:
 
     def is_empty_data_folder(self):
         """Utility function that checks if the data folder is empty.
+        logger.info("DataManager: %s:  is_empty_data_folder", time.time())
 
         Returns:
             bool: checks if the data folder is empty.
@@ -67,6 +74,7 @@ class DataManager:
 
     def create_data_file(self):
         """Utility function that creates dummy data files."""
+        logger.info("DataManager: %s:  create_data_file", time.time())
         csv_file_path = os.path.join(self.data_folder, DATA_CSV)
         json_file_path = os.path.join(self.data_folder, METADATA_JSON)
 
@@ -80,6 +88,7 @@ class DataManager:
 
     def load_transactions(self):
         """Load transactins from csv file."""
+        logger.info("DataManager: %s:  load_transactions", time.time())
         data_df = self.load_csv()
         df_cleaned = data_df.fillna("")
 
@@ -91,11 +100,13 @@ class DataManager:
         Returns:
             pandas.DataFrame: return a pandas dataframe of the csv file.
         """
+        logger.info("DataManager: %s:  load_csv", time.time())
         data_df = pd.read_csv(os.path.join(self.data_folder, DATA_CSV))
         return data_df
 
     def load_metadata(self):
         """Load metadata json file."""
+        logger.info("DataManager: %s:  load_metadata", time.time())
         with open(
             os.path.join(self.data_folder, METADATA_JSON), "r", encoding="utf8"
         ) as file:
@@ -111,6 +122,7 @@ class DataManager:
         Returns:
             float: balance value for the requested account.
         """
+        logger.info("DataManager: %s:  get_account_balance", time.time())
         if self.balances is not None:
             if account in self.balances:
                 return self.balances[account]
@@ -125,6 +137,7 @@ class DataManager:
         Args:
             account (str): account name.
         """
+        logger.info("DataManager: %s:  update_balance", time.time())
         new_balance = 0
         if self.balances is None:
             self.balances = {}
@@ -137,6 +150,7 @@ class DataManager:
 
     def save_metadata(self):
         """save metadata in a json file."""
+        logger.info("DataManager: %s:  save_metadata", time.time())
         # TODO keep last n version of a file # pylint: disable=W0511
         # update metadata
         self.metadata["accounts"] = self.accounts
@@ -150,6 +164,7 @@ class DataManager:
 
     def save_transactions(self):
         """save transactions in a csv file."""
+        logger.info("DataManager: %s:  save_transactions", time.time())
         # TODO keep last n version of a file # pylint: disable=W0511
         csv_file_path = os.path.join(self.data_folder, DATA_CSV)
         # Convert the list of dictionaries to a DataFrame
@@ -164,6 +179,7 @@ class DataManager:
         Args:
             category (str): category name.
         """
+        logger.info("DataManager: %s:  add_category", time.time())
         validate_input(
             item=category, item_list=self.categories, item_type=str, mode="add"
         )
@@ -180,6 +196,7 @@ class DataManager:
         Args:
             subcategory (str): subcategory name.
         """
+        logger.info("DataManager: %s:  add_subcategory", time.time())
         validate_input(
             item=subcategory, item_list=self.sub_categories, item_type=str, mode="add"
         )
@@ -196,6 +213,7 @@ class DataManager:
         Args:
             account (str): account name.
         """
+        logger.info("DataManager: %s:  add_account", time.time())
         validate_input(item=account, item_list=self.accounts, item_type=str, mode="add")
 
         # add category
@@ -210,6 +228,7 @@ class DataManager:
         Args:
             transaction (dict): transaction dict.
         """
+        logger.info("DataManager: %s:  add_transaction", time.time())
         validate_input(
             item=transaction, item_list=self.transactions, item_type=dict, mode="add"
         )
@@ -238,6 +257,7 @@ class DataManager:
         Raises:
             ValueError: If category is still used.
         """
+        logger.info("DataManager: %s:  remove_category", time.time())
         validate_input(
             item=category, item_list=self.categories, item_type=str, mode="remove"
         )
@@ -261,6 +281,7 @@ class DataManager:
         Raises:
             ValueError: If subcategory is still used.
         """
+        logger.info("DataManager: %s:  remove_subcategory", time.time())
         validate_input(
             item=subcategory,
             item_list=self.sub_categories,
@@ -287,6 +308,7 @@ class DataManager:
         Raises:
             ValueError: If account is still used.
         """
+        logger.info("DataManager: %s:  remove_account", time.time())
         validate_input(
             item=account, item_list=self.accounts, item_type=str, mode="remove"
         )
@@ -307,6 +329,7 @@ class DataManager:
         Args:
             transaction (dict): transaction dict.
         """
+        logger.info("DataManager: %s:  remove_transaction", time.time())
         validate_input(
             item=transaction, item_list=self.transactions, item_type=dict, mode="remove"
         )

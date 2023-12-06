@@ -1,4 +1,7 @@
 """Module to define the settings page to insert in the bottom navbar of the app."""
+import logging
+import time
+
 from kivymd.uix.bottomnavigation import MDBottomNavigationItem
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.gridlayout import MDGridLayout
@@ -8,6 +11,8 @@ from kivymd.uix.selectioncontrol import MDSwitch
 
 from .data_manager import DataManager
 
+logger = logging.getLogger(__name__)
+
 
 class SettingsPage:
     """
@@ -16,6 +21,7 @@ class SettingsPage:
     """
 
     def __init__(self, data_manager: DataManager):
+        logger.info("SettingsPage: %s:  __init__", time.time())
         self.data_manager = data_manager
 
     def build_page(self):
@@ -25,6 +31,7 @@ class SettingsPage:
         Returns:
             MDBottomNavigationItem: Bottom navbar item.
         """
+        logger.info("SettingsPage: %s:  build_page", time.time())
         return MDBottomNavigationItem(
             self.build_settings(),
             name="settings",
@@ -52,6 +59,7 @@ class SettingsPage:
         Returns:
             MDGridLayout: settings page content
         """
+        logger.info("SettingsPage: %s:  build_settings", time.time())
         switch_layout = MDBoxLayout(orientation="horizontal", padding=20, spacing=10)
 
         label = MDLabel(text="Toggle Switch")

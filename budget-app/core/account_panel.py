@@ -1,4 +1,7 @@
 """Module to define the account page to insert in the bottom navbar of the app."""
+import logging
+import time
+
 from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.bottomnavigation import MDBottomNavigationItem
 from kivymd.uix.button import MDFloatingActionButton
@@ -14,6 +17,8 @@ from kivymd.uix.textfield import MDTextField
 from .data_manager import DataManager
 from .utils.dialogbox import DialogBuilder
 
+logger = logging.getLogger(__name__)
+
 
 class AccountPage:
     """
@@ -22,6 +27,7 @@ class AccountPage:
     """
 
     def __init__(self, data_manager: DataManager):
+        logger.info("AccountPage: %s:  __init__", time.time())
         self.data_manager = data_manager
         self.accounts_list = MDList()
         self.accounts = self.data_manager.accounts
@@ -35,7 +41,8 @@ class AccountPage:
         Returns:
             MDBottomNavigationItem: Bottom navbar item.
         """
-        self.base.add_widget(self.generate_account_list())
+        logger.info("AccountPage: %s:  build_page")
+        self.base.add_widget(self.generate_account_list(), time.time())
         self.base.add_widget(
             MDFloatingActionButton(
                 icon="plus",
@@ -61,6 +68,7 @@ class AccountPage:
         Returns:
             OneLineAvatarIconListItem: widget with icon, description and delete button.
         """
+        logger.info("AccountPage: %s:  single_account_widget", time.time())
         return OneLineAvatarIconListItem(
             IconLeftWidget(icon="bank"),
             IconRightWidget(
@@ -78,6 +86,7 @@ class AccountPage:
         Returns:
             MDScrollView: list widget with all account names and balances.
         """
+        logger.info("AccountPage: %s:  generate_account_list", time.time())
         for account in self.accounts:
             description = f"{account} |\
                  Balance: {self.data_manager.get_account_balance(account=account)}$"
@@ -94,8 +103,7 @@ class AccountPage:
         Args:
             account_name (str): new account name.
         """
-        print(account_name)
-        print(account_name.text)
+        logger.info("AccountPage: %s:  add_new_account", time.time())
         account_name = account_name.text
         # add new account to data manager
         self.data_manager.add_account(account=account_name)
@@ -115,6 +123,7 @@ class AccountPage:
         Args:
             input_list (list): list of two elements: account name and description.
         """
+        logger.info("AccountPage: %s:  delete_account", time.time())
         account = input_list[0]
         description = input_list[1]
         # Remove the corresponding widget from the layout
@@ -128,7 +137,7 @@ class AccountPage:
 
     def get_dialog_text_input(self, instance):  # pylint: disable=W0613
         """Opens Pop-up box with a text field to insert new account name."""
-
+        logger.info("AccountPage: %s:  get_dialog_text_input", time.time())
         if not self.dialog:
             # create text input
             text_input = MDTextField(hint_text="Enter a new account")
