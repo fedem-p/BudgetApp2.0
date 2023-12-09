@@ -20,6 +20,7 @@ from kivymd.uix.textfield import MDTextField
 from .data_manager import DataManager
 from .utils.dialogbox import DialogBuilder
 from .utils.utils import dict2str, str2dict
+from .utils.validator import validate_transaction
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,7 @@ class TransactionPage:
         self.base = BoxLayout()
         self.save_dialog = None
         self.delete_dialog = None
+        self.transfer_dialog = None
 
     def build_page(self):
         """Builds a page using a bottom navbar item and
@@ -51,9 +53,16 @@ class TransactionPage:
         # pylint: disable=R0801
         self.base.add_widget(  # pylint: disable=R0801
             MDFloatingActionButton(
+                icon="swap-horizontal",
+                pos_hint={"right": 1, "bottom": 1},
+                on_release=self.get_dialog_transfer_input,
+            )
+        )
+        self.base.add_widget(  # pylint: disable=R0801
+            MDFloatingActionButton(
                 icon="plus",
                 pos_hint={"right": 1, "bottom": 1},
-                on_release=self.get_dialog_text_input,
+                on_release=self.get_dialog_transaction_input,
             )
         )
         # pylint: enable=R0801
@@ -108,10 +117,8 @@ class TransactionPage:
             input_list (list): list of two elements: transaction dict and description.
         """
         logger.info("TransactionPage: %s:  delete_transaction", time.time())
-        logger.debug(transaction_label.text)
         transaction_text = transaction_label.text
         transaction = str2dict(transaction_label.text)
-        logger.debug(transaction)
         # Remove the corresponding widget from the layout
         widget_to_remove = next(
             widget
@@ -140,20 +147,20 @@ class TransactionPage:
             "note": box.ids["note"].text,
         }
 
-        # add new account to data manager
+        # add new transaction to data manager
         self.data_manager.add_transaction(transaction=transaction)
-        # add account to list
+        # add transaction to list
         self.transaction_list.add_widget(
             self.single_transaction_widget(transaction=transaction)
         )
         # dismiss input dialog
         self.save_dialog.dismiss()
 
-    def get_dialog_text_input(self, instance):  # pylint: disable=W0613
+    def get_dialog_transaction_input(self, instance):  # pylint: disable=W0613
         """Opens Pop-up box with a text field to insert new transaction name."""
-        logger.info("TransactionPage: %s:  get_dialog_text_input", time.time())
+        logger.info("TransactionPage: %s:  get_dialog_transaction_input", time.time())
         if not self.save_dialog:
-            # create text input
+            # create text input for each field
             date_input = MDTextField(
                 id="date",
                 hint_text="Enter a date",
@@ -205,14 +212,120 @@ class TransactionPage:
     def get_confirmation_dialog(self, item):
         """Opens Pop-up box with a text field to delete a transaction."""
         logger.info("TransactionPage: %s:  get_confirmation_dialog", time.time())
-        if not self.delete_dialog:
-            # create text input
-            display_text = MDLabel(text=dict2str(item))
-            # create dialog button
-            self.delete_dialog = DialogBuilder().build_dialog(
-                title="Delete this transaction?",
-                content=display_text,
-                on_release_function=self.delete_transaction,
-            )
+        # create text input
+        display_text = MDLabel(text=dict2str(item))
+        # create dialog button
+        self.delete_dialog = DialogBuilder().build_dialog(
+            title="Delete this transaction?",
+            content=display_text,
+            on_release_function=self.delete_transaction,
+        )
 
         self.delete_dialog.open()
+
+    def get_dialog_transfer_input(self, instance):  # pylint: disable=W0613
+        """Opens Pop-up box with a text field to insert new transfer."""
+        logger.info("TransactionPage: %s:  get_dialog_transfer_input", time.time())
+        if not self.transfer_dialog:
+            # create text input for each field
+            date_input = MDTextField(
+                id="date",
+                hint_text="Enter a date",
+                validator="date",
+                date_format="yyyy/mm/dd",
+                text=datetime.now().strftime("%Y/%m/%d"),
+                required=True,
+            )
+            amount_input = MDTextField(
+                id="amount", hint_text="Enter a numeric amount", required=True
+            )
+            from_account = MDTextField(
+                id="from-account",
+                hint_text="(FROM) Enter withdraw account",
+                required=True,
+            )
+            to_account = MDTextField(
+                id="to-account", hint_text="(TO) Enter deposit account", required=True
+            )
+            note_input = MDTextField(id="note", hint_text="Enter any extra information")
+
+            my_box = MDBoxLayout(
+                date_input,
+                amount_input,
+                from_account,
+                to_account,
+                note_input,
+                orientation="vertical",
+                # spacing="12dp",
+                size_hint_y=None,
+                height="420dp",
+            )
+
+            # create dialog button
+            self.transfer_dialog = DialogBuilder().build_dialog(
+                title="Add new Transfer:",
+                content=my_box,
+                on_release_function=self.transfer_funds,
+            )
+
+        self.transfer_dialog.open()
+
+    def transfer_funds(self, box):
+        """Add new transfer between two accounts to the list of transactions.
+
+        Args:
+            box (dict): widget with the inputs of the dialog box.
+        """
+        logger.info("TransactionPage: %s:  transfer_funds", time.time())
+
+        date = box.ids["date"].text
+        amount = box.ids["amount"].text
+        from_account = box.ids["from-account"].text
+        to_account = box.ids["to-account"].text
+        note = box.ids["note"].text
+
+        transaction_from = {
+            "date": date,
+            "type": "withdraw",
+            "amount": amount,
+            "account": from_account,
+            "category": "banktransfer",
+            "subcategory": "banktransfer",
+            "note": note,
+        }
+        transaction_to = {
+            "date": date,
+            "type": "deposit",
+            "amount": amount,
+            "account": to_account,
+            "category": "banktransfer",
+            "subcategory": "banktransfer",
+            "note": note,
+        }
+
+        # check that both accounts exist
+        validate_transaction(
+            item=transaction_from,
+            accounts=self.data_manager.accounts,
+            categories=self.data_manager.categories,
+            sub_categories=self.data_manager.sub_categories,
+        )
+        validate_transaction(
+            item=transaction_to,
+            accounts=self.data_manager.accounts,
+            categories=self.data_manager.categories,
+            sub_categories=self.data_manager.sub_categories,
+        )
+
+        # add new transactions to data manager
+        self.data_manager.add_transaction(transaction=transaction_from)
+        self.data_manager.add_transaction(transaction=transaction_to)
+        # add transactions to list
+        self.transaction_list.add_widget(
+            self.single_transaction_widget(transaction=transaction_from)
+        )
+        self.transaction_list.add_widget(
+            self.single_transaction_widget(transaction=transaction_to)
+        )
+        # dismiss input dialog
+        self.transfer_dialog.dismiss()
