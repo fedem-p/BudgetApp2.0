@@ -2,8 +2,8 @@
 import logging
 import time
 
-from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.bottomnavigation import MDBottomNavigationItem
+from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFloatingActionButton
 from kivymd.uix.label import MDLabel
 from kivymd.uix.list import (
@@ -32,7 +32,7 @@ class AccountPage:
         self.data_manager = data_manager
         self.accounts_list = MDList()
         self.accounts = self.data_manager.accounts
-        self.base = BoxLayout()
+        self.base = MDBoxLayout()
         self.save_dialog = None
         self.delete_dialog = None
 
@@ -43,8 +43,8 @@ class AccountPage:
         Returns:
             MDBottomNavigationItem: Bottom navbar item.
         """
-        logger.info("AccountPage: %s:  build_page")
-        self.base.add_widget(self.generate_account_list(), time.time())
+        logger.info("AccountPage: %s:  build_page", time.time())
+        self.base.add_widget(self.generate_account_list())
         self.base.add_widget(
             MDFloatingActionButton(
                 icon="plus",
