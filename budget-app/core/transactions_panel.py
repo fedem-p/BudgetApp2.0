@@ -7,6 +7,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.bottomnavigation import MDBottomNavigationItem
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFloatingActionButton
+from kivymd.uix.label import MDLabel
 from kivymd.uix.list import (
     IconLeftWidget,
     IconRightWidget,
@@ -18,6 +19,7 @@ from kivymd.uix.textfield import MDTextField
 
 from .data_manager import DataManager
 from .utils.dialogbox import DialogBuilder
+from .utils.utils import dict2str, str2dict
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +36,8 @@ class TransactionPage:
         self.transaction_list = MDList()
         self.transactions = self.data_manager.transactions
         self.base = BoxLayout()
-        self.dialog = None
+        self.save_dialog = None
+        self.delete_dialog = None
 
     def build_page(self):
         """Builds a page using a bottom navbar item and
@@ -85,43 +88,40 @@ class TransactionPage:
             OneLineAvatarIconListItem: widget with icon, details and delete button.
         """
         logger.info("TransactionPage: %s:  single_transaction_widget", time.time())
-        description = f"Date:        {transaction['date']},\
-                    Type:        {transaction['type']},\
-                    Amount:      {transaction['amount']}$,\
-                    Account:     {transaction['account']},\
-                    Category:    {transaction['category']},\
-                    SubCategory: {transaction['subcategory']},\
-                    Notes:       {transaction['note']}"
+        description = dict2str(transaction)
 
         return OneLineAvatarIconListItem(
             IconLeftWidget(icon="swap-horizontal"),
             IconRightWidget(
                 icon="delete",
-                on_release=lambda x, item=[
-                    transaction,
-                    description,
-                ]: self.delete_transaction(item),
+                on_release=lambda x, item=transaction: self.get_confirmation_dialog(
+                    item
+                ),
             ),
             text=description,
         )
 
-    def delete_transaction(self, input_list):
+    def delete_transaction(self, transaction_label):
         """Delete transaction element from the list of transactions.
 
         Args:
             input_list (list): list of two elements: transaction dict and description.
         """
         logger.info("TransactionPage: %s:  delete_transaction", time.time())
-        transaction = input_list[0]
-        description = input_list[1]
+        logger.debug(transaction_label.text)
+        transaction_text = transaction_label.text
+        transaction = str2dict(transaction_label.text)
+        logger.debug(transaction)
         # Remove the corresponding widget from the layout
         widget_to_remove = next(
             widget
             for widget in self.transaction_list.children
-            if widget.text == description
+            if widget.text == transaction_text
         )
         self.transaction_list.remove_widget(widget_to_remove)
         self.data_manager.remove_transaction(transaction=transaction)
+
+        self.delete_dialog.dismiss()
 
     def add_new_transaction(self, box):
         """Add new transaction element to the list of transactions.
@@ -147,12 +147,12 @@ class TransactionPage:
             self.single_transaction_widget(transaction=transaction)
         )
         # dismiss input dialog
-        self.dialog.dismiss()
+        self.save_dialog.dismiss()
 
     def get_dialog_text_input(self, instance):  # pylint: disable=W0613
         """Opens Pop-up box with a text field to insert new transaction name."""
         logger.info("TransactionPage: %s:  get_dialog_text_input", time.time())
-        if not self.dialog:
+        if not self.save_dialog:
             # create text input
             date_input = MDTextField(
                 id="date",
@@ -194,10 +194,25 @@ class TransactionPage:
             )
 
             # create dialog button
-            self.dialog = DialogBuilder().build_dialog(
-                title="Add new Account:",
+            self.save_dialog = DialogBuilder().build_dialog(
+                title="Add new Transaction:",
                 content=my_box,
                 on_release_function=self.add_new_transaction,
             )
 
-        self.dialog.open()
+        self.save_dialog.open()
+
+    def get_confirmation_dialog(self, item):
+        """Opens Pop-up box with a text field to delete a transaction."""
+        logger.info("TransactionPage: %s:  get_confirmation_dialog", time.time())
+        if not self.delete_dialog:
+            # create text input
+            display_text = MDLabel(text=dict2str(item))
+            # create dialog button
+            self.delete_dialog = DialogBuilder().build_dialog(
+                title="Delete this transaction?",
+                content=display_text,
+                on_release_function=self.delete_transaction,
+            )
+
+        self.delete_dialog.open()
