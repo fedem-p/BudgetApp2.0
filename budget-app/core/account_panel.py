@@ -5,6 +5,7 @@ import time
 from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.bottomnavigation import MDBottomNavigationItem
 from kivymd.uix.button import MDFloatingActionButton
+from kivymd.uix.label import MDLabel
 from kivymd.uix.list import (
     IconLeftWidget,
     IconRightWidget,
@@ -32,7 +33,8 @@ class AccountPage:
         self.accounts_list = MDList()
         self.accounts = self.data_manager.accounts
         self.base = BoxLayout()
-        self.dialog = None
+        self.save_dialog = None
+        self.delete_dialog = None
 
     def build_page(self):
         """Builds a page using a bottom navbar item and
@@ -73,11 +75,13 @@ class AccountPage:
             IconLeftWidget(icon="bank"),
             IconRightWidget(
                 icon="delete",
-                on_release=lambda x, item=[account, description]: self.delete_account(
-                    item
-                ),
+                on_release=lambda x, item=[
+                    account,
+                    description,
+                ]: self.get_confirmation_dialog(item),
             ),
             text=description,
+            id=account,
         )
 
     def generate_account_list(self):
@@ -115,37 +119,53 @@ class AccountPage:
             self.single_account_widget(account=account_name, description=description)
         )
         # dismiss input dialog
-        self.dialog.dismiss()
+        self.save_dialog.dismiss()
 
-    def delete_account(self, input_list):
+    def delete_account(self, account_label):
         """Delete account element from the list of accounts.
 
         Args:
             input_list (list): list of two elements: account name and description.
         """
         logger.info("AccountPage: %s:  delete_account", time.time())
-        account = input_list[0]
-        description = input_list[1]
+        account = account_label.text
+        # description = input_list[1]
         # Remove the corresponding widget from the layout
         widget_to_remove = next(
-            widget
-            for widget in self.accounts_list.children
-            if widget.text == description
+            widget for widget in self.accounts_list.children if widget.id == account
         )
         self.accounts_list.remove_widget(widget_to_remove)
         self.data_manager.remove_account(account=account)
 
+        # dismiss input dialog
+        self.delete_dialog.dismiss()
+
     def get_dialog_text_input(self, instance):  # pylint: disable=W0613
         """Opens Pop-up box with a text field to insert new account name."""
         logger.info("AccountPage: %s:  get_dialog_text_input", time.time())
-        if not self.dialog:
+        if not self.save_dialog:
             # create text input
             text_input = MDTextField(hint_text="Enter a new account")
             # create dialog button
-            self.dialog = DialogBuilder().build_dialog(
+            self.save_dialog = DialogBuilder().build_dialog(
                 title="Add new Account:",
                 content=text_input,
                 on_release_function=self.add_new_account,
             )
 
-        self.dialog.open()
+        self.save_dialog.open()
+
+    def get_confirmation_dialog(self, item):
+        """Opens Pop-up box with a text field to delete an account."""
+        logger.info("AccountPage: %s:  get_confirmation_dialog", time.time())
+        if not self.delete_dialog:
+            # create text input
+            display_text = MDLabel(text=item[0])
+            # create dialog button
+            self.delete_dialog = DialogBuilder().build_dialog(
+                title="Delete this account?",
+                content=display_text,
+                on_release_function=self.delete_account,
+            )
+
+        self.delete_dialog.open()
