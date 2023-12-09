@@ -10,6 +10,8 @@ from kivymd.uix.list import IconLeftWidget, OneLineAvatarIconListItem
 from kivymd.uix.selectioncontrol import MDSwitch
 
 from .data_manager import DataManager
+from .utils.category_settings import CategoryWidget
+from .utils.subcategory_settings import SubcategoryWidget
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +25,8 @@ class SettingsPage:
     def __init__(self, data_manager: DataManager):
         logger.info("SettingsPage: %s:  __init__", time.time())
         self.data_manager = data_manager
+        self.category_settings = CategoryWidget(self.data_manager)
+        self.subcategory_settings = SubcategoryWidget(self.data_manager)
 
     def build_page(self):
         """Builds a page using a bottom navbar item and
@@ -72,41 +76,65 @@ class SettingsPage:
         grid_layout = MDGridLayout(cols=1, adaptive_height=True, padding=10, spacing=10)
 
         grid_layout.add_widget(switch_layout)
-        grid_layout.add_widget(
-            OneLineAvatarIconListItem(
-                IconLeftWidget(icon="github"),
-                text="Download data (csv file)",
-                on_release=lambda x: print(
-                    "Downloading data!"
-                ),  # TODO # pylint: disable=W0511
-            )
-        )
-        grid_layout.add_widget(
-            OneLineAvatarIconListItem(
-                IconLeftWidget(icon="github"),
-                text="Upload data (csv file)",
-                on_release=lambda x: print(
-                    "Uploading data!"
-                ),  # TODO # pylint: disable=W0511
-            )
-        )
-        grid_layout.add_widget(
-            OneLineAvatarIconListItem(
-                IconLeftWidget(icon="github"),
-                text="Categories",
-                on_release=lambda x: print(
-                    "Add/Remove Category"
-                ),  # TODO # pylint: disable=W0511
-            )
-        )
-        grid_layout.add_widget(
-            OneLineAvatarIconListItem(
-                IconLeftWidget(icon="github"),
-                text="SubCategories",
-                on_release=lambda x: print(
-                    "Add/Remove SubCategory"
-                ),  # TODO # pylint: disable=W0511
-            )
-        )
+        grid_layout.add_widget(self.get_download_button())
+        grid_layout.add_widget(self.get_upload_button())
+        grid_layout.add_widget(self.get_category_settings())
+        grid_layout.add_widget(self.get_subcategory_settings())
 
         return grid_layout
+
+    def get_download_button(self):
+        """Returns a one line settings button to download the data.
+
+        Returns:
+            OneLineAvatarIconListItem: Settings button.
+        """
+        logger.info("SettingsPage: %s:  get_download_button", time.time())
+        return OneLineAvatarIconListItem(
+            IconLeftWidget(icon="github"),
+            text="Download data (csv file)",
+            on_release=lambda x: print(
+                "Downloading data!"
+            ),  # TODO # pylint: disable=W0511
+        )
+
+    def get_upload_button(self):
+        """Returns a one line settings button to upload data.
+
+        Returns:
+            OneLineAvatarIconListItem: Settings button.
+        """
+        logger.info("SettingsPage: %s:  get_upload_button", time.time())
+        return OneLineAvatarIconListItem(
+            IconLeftWidget(icon="github"),
+            text="Upload data (csv file)",
+            on_release=lambda x: print(
+                "Uploading data!"
+            ),  # TODO # pylint: disable=W0511
+        )
+
+    def get_category_settings(self):
+        """Returns a one line settings button to add/remove categories.
+
+        Returns:
+            OneLineAvatarIconListItem: Settings button.
+        """
+        logger.info("SettingsPage: %s:  get_category_settings", time.time())
+        return OneLineAvatarIconListItem(
+            IconLeftWidget(icon="github"),
+            text="Categories",
+            on_release=self.category_settings.get_category_dialog,
+        )
+
+    def get_subcategory_settings(self):
+        """Returns a one line settings button to add/remove subcategories.
+
+        Returns:
+            OneLineAvatarIconListItem: Settings button.
+        """
+        logger.info("SettingsPage: %s:  get_subcategory_settings", time.time())
+        return OneLineAvatarIconListItem(
+            IconLeftWidget(icon="github"),
+            text="SubCategories",
+            on_release=self.subcategory_settings.get_subcategory_dialog,
+        )

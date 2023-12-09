@@ -76,7 +76,15 @@ EXAMPLE_DATA = [
 ]
 EXAMPLE_METADATA = {
     "accounts": ["N26", "C24", "Wallet"],
-    "categories": ["salary", "gift", "bar", "transport", "grocery", "banktransfer", ""],
+    "categories": [
+        "salary",
+        "gift",
+        "bar",
+        "transport",
+        "grocery",
+        "banktransfer",
+        "other",
+    ],
     "subcategories": [
         "food",
         "evotec",
@@ -84,6 +92,6 @@ EXAMPLE_METADATA = {
         "alcohol",
         "public transport",
         "banktransfer",
-        "",
+        "other",
     ],
 }

@@ -3,7 +3,6 @@ import logging
 import time
 from datetime import datetime
 
-from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.bottomnavigation import MDBottomNavigationItem
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFloatingActionButton
@@ -36,7 +35,7 @@ class TransactionPage:
         self.data_manager = data_manager
         self.transaction_list = MDList()
         self.transactions = self.data_manager.transactions
-        self.base = BoxLayout()
+        self.base = MDBoxLayout()
         self.save_dialog = None
         self.delete_dialog = None
         self.transfer_dialog = None
