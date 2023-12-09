@@ -240,12 +240,15 @@ class DataManager:
             sub_categories=self.sub_categories,
         )
 
-        transaction["amount"] = int(transaction["amount"])
+        if transaction["type"] in {"income", "deposit"}:
+            transaction["amount"] = int(transaction["amount"])
+        else:
+            transaction["amount"] = -abs(int(transaction["amount"]))
 
-        # add category
+        # add transaction
         self.transactions.append(transaction)
 
-        # save new metadata
+        # save new data
         self.save_transactions()
 
     def remove_category(self, category):
