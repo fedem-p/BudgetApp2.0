@@ -27,7 +27,8 @@ def validate_transaction(item, accounts, categories, sub_categories):
     if item["type"] not in {
         "income",
         "expense",
-        "transfer",
+        "withdraw",
+        "deposit",
     }:  # pylint: disable=raise-missing-from
         raise ValueError(
             f"Transaction Error: Unknown transaction type: {item['type']}."
