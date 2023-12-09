@@ -30,7 +30,7 @@ class DialogBuilder:  # pylint: disable=too-few-public-methods
             buttons=[
                 MDFlatButton(text="CANCEL", on_release=lambda x: self.widget.dismiss()),
                 MDFlatButton(
-                    text="Save",
+                    text="CONFIRM",
                     on_release=lambda x, item=content: on_release_function(item),
                 ),
             ],
