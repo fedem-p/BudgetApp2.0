@@ -10,7 +10,9 @@ class DialogBuilder:  # pylint: disable=too-few-public-methods
         """initialize widget to return to None."""
         self.widget = None
 
-    def build_dialog(self, content, title, on_release_function, widget_type="custom"):
+    def build_dialog(
+        self, content, title, on_release_function=None, widget_type="custom"
+    ):
         """Builds and returns a dialog box based on the inputs with a save and cancel button.
 
         Args:
@@ -23,6 +25,7 @@ class DialogBuilder:  # pylint: disable=too-few-public-methods
         Returns:
             MDDialog: dialog box.
         """
+
         self.widget = MDDialog(
             title=title,
             content_cls=content,
@@ -31,7 +34,9 @@ class DialogBuilder:  # pylint: disable=too-few-public-methods
                 MDFlatButton(text="CANCEL", on_release=lambda x: self.widget.dismiss()),
                 MDFlatButton(
                     text="CONFIRM",
-                    on_release=lambda x, item=content: on_release_function(item),
+                    on_release=lambda x: self.widget.dismiss()
+                    if on_release_function is None
+                    else lambda x, item=content: on_release_function(item),
                 ),
             ],
         )
