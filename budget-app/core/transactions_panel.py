@@ -18,6 +18,7 @@ from kivymd.uix.textfield import MDTextField
 
 from .data_manager import DataManager
 from .utils.dialogbox import DialogBuilder
+from .utils.utils import dict2str, str2dict
 
 logger = logging.getLogger(__name__)
 
@@ -85,13 +86,7 @@ class TransactionPage:
             OneLineAvatarIconListItem: widget with icon, details and delete button.
         """
         logger.info("TransactionPage: %s:  single_transaction_widget", time.time())
-        description = f"Date:        {transaction['date']},\
-                    Type:        {transaction['type']},\
-                    Amount:      {transaction['amount']}$,\
-                    Account:     {transaction['account']},\
-                    Category:    {transaction['category']},\
-                    SubCategory: {transaction['subcategory']},\
-                    Notes:       {transaction['note']}"
+        description = dict2str(transaction)
 
         return OneLineAvatarIconListItem(
             IconLeftWidget(icon="swap-horizontal"),
