@@ -10,7 +10,7 @@ class DialogBuilder:  # pylint: disable=too-few-public-methods
         """initialize widget to return to None."""
         self.widget = None
 
-    def build_dialog(
+    def build_save_dialog(
         self, content, title, on_release_function=None, widget_type="custom"
     ):
         """Builds and returns a dialog box based on the inputs with a save and cancel button.
@@ -34,9 +34,33 @@ class DialogBuilder:  # pylint: disable=too-few-public-methods
                 MDFlatButton(text="CANCEL", on_release=lambda x: self.widget.dismiss()),
                 MDFlatButton(
                     text="CONFIRM",
-                    on_release=lambda x: self.widget.dismiss()
-                    if on_release_function is None
-                    else lambda x, item=content: on_release_function(item),
+                    on_release=lambda x, item=content: on_release_function(item),
+                ),
+            ],
+        )
+
+        return self.widget
+
+    def build_confirmation_dialog(self, content, title, widget_type="custom"):
+        """Builds and returns a dialog box based on the inputs with a save and cancel button.
+
+        Args:
+            content (MDwidget): Any widget that can take an input.
+            title (str): Title of the dialog box.
+            widget_type (str, optional): type of the dialog box. Defaults to "custom".
+
+        Returns:
+            MDDialog: dialog box.
+        """
+
+        self.widget = MDDialog(
+            title=title,
+            content_cls=content,
+            type=widget_type,
+            buttons=[
+                MDFlatButton(text="CANCEL", on_release=lambda x: self.widget.dismiss()),
+                MDFlatButton(
+                    text="CONFIRM", on_release=lambda x: self.widget.dismiss()
                 ),
             ],
         )

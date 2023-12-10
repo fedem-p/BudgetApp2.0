@@ -128,7 +128,7 @@ class SubcategoryWidget:
         logger.info("SubcategoryWidget: %s:  get_subcategory_dialog", time.time())
         if not self.subcategory_dialog:
             # create dialog button
-            self.subcategory_dialog = DialogBuilder().build_dialog(
+            self.subcategory_dialog = DialogBuilder().build_confirmation_dialog(
                 title="Add new subcategory:",
                 content=MDBoxLayout(
                     self.generate_subcategory_list(),

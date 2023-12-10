@@ -18,6 +18,7 @@ from kivymd.uix.textfield import MDTextField
 
 from .data_manager import DataManager
 from .utils.dialogbox import DialogBuilder
+from .utils.dropdown_list import DropdownBuilder
 from .utils.utils import dict2str, str2dict
 from .utils.validator import validate_transaction
 
@@ -168,21 +169,27 @@ class TransactionPage:
                 text=datetime.now().strftime("%Y/%m/%d"),
                 required=True,
             )
-            type_input = MDTextField(
-                id="type", hint_text="income / expense / transfer", required=True
-            )
+            type_input = DropdownBuilder(
+                main_id="type", items=["income", "expense"]
+            ).get_dropdown_list()
             amount_input = MDTextField(
                 id="amount", hint_text="Enter a numeric amount", required=True
             )
-            account_input = MDTextField(
-                id="account", hint_text="Enter an account", required=True
-            )
-            category_input = MDTextField(
-                id="category", hint_text="Enter a category", required=True
-            )
-            subcategory_input = MDTextField(
-                id="subcategory", hint_text="Enter a subcategory", required=True
-            )
+            account_input = DropdownBuilder(
+                main_id="account",
+                initial_text="Enter an account",
+                items=self.data_manager.accounts,
+            ).get_dropdown_list()
+            category_input = DropdownBuilder(
+                main_id="category",
+                initial_text="Enter a category",
+                items=self.data_manager.categories,
+            ).get_dropdown_list()
+            subcategory_input = DropdownBuilder(
+                main_id="subcategory",
+                initial_text="Enter a subcategory",
+                items=self.data_manager.sub_categories,
+            ).get_dropdown_list()
             note_input = MDTextField(id="note", hint_text="Enter any extra information")
 
             my_box = MDBoxLayout(
@@ -200,7 +207,7 @@ class TransactionPage:
             )
 
             # create dialog button
-            self.save_dialog = DialogBuilder().build_dialog(
+            self.save_dialog = DialogBuilder().build_save_dialog(
                 title="Add new Transaction:",
                 content=my_box,
                 on_release_function=self.add_new_transaction,
@@ -214,7 +221,7 @@ class TransactionPage:
         # create text input
         display_text = MDLabel(text=dict2str(item))
         # create dialog button
-        self.delete_dialog = DialogBuilder().build_dialog(
+        self.delete_dialog = DialogBuilder().build_save_dialog(
             title="Delete this transaction?",
             content=display_text,
             on_release_function=self.delete_transaction,
@@ -238,14 +245,16 @@ class TransactionPage:
             amount_input = MDTextField(
                 id="amount", hint_text="Enter a numeric amount", required=True
             )
-            from_account = MDTextField(
-                id="from-account",
-                hint_text="(FROM) Enter withdraw account",
-                required=True,
-            )
-            to_account = MDTextField(
-                id="to-account", hint_text="(TO) Enter deposit account", required=True
-            )
+            from_account = DropdownBuilder(
+                main_id="from-account",
+                items=self.data_manager.accounts,
+                initial_text="(FROM) Enter withdraw account",
+            ).get_dropdown_list()
+            to_account = DropdownBuilder(
+                main_id="to-account",
+                initial_text="(TO) Enter deposit account",
+                items=self.data_manager.accounts,
+            ).get_dropdown_list()
             note_input = MDTextField(id="note", hint_text="Enter any extra information")
 
             my_box = MDBoxLayout(
@@ -261,7 +270,7 @@ class TransactionPage:
             )
 
             # create dialog button
-            self.transfer_dialog = DialogBuilder().build_dialog(
+            self.transfer_dialog = DialogBuilder().build_save_dialog(
                 title="Add new Transfer:",
                 content=my_box,
                 on_release_function=self.transfer_funds,
@@ -282,6 +291,12 @@ class TransactionPage:
         from_account = box.ids["from-account"].text
         to_account = box.ids["to-account"].text
         note = box.ids["note"].text
+
+        if from_account == to_account:
+            raise ValueError("Accounts must be different!")
+
+        if "(FROM)" in from_account or "(TO)" in to_account:
+            raise ValueError("You must select an account!")
 
         transaction_from = {
             "date": date,

@@ -147,7 +147,7 @@ class AccountPage:
             # create text input
             text_input = MDTextField(hint_text="Enter a new account")
             # create dialog button
-            self.save_dialog = DialogBuilder().build_dialog(
+            self.save_dialog = DialogBuilder().build_save_dialog(
                 title="Add new Account:",
                 content=text_input,
                 on_release_function=self.add_new_account,
@@ -162,7 +162,7 @@ class AccountPage:
             # create text input
             display_text = MDLabel(text=item[0])
             # create dialog button
-            self.delete_dialog = DialogBuilder().build_dialog(
+            self.delete_dialog = DialogBuilder().build_save_dialog(
                 title="Delete this account?",
                 content=display_text,
                 on_release_function=self.delete_account,
