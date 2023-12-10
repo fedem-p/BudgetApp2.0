@@ -123,7 +123,7 @@ class CategoryWidget:
         logger.info("CategoryWidget: %s:  get_category_dialog", time.time())
         if not self.category_dialog:
             # create dialog button
-            self.category_dialog = DialogBuilder().build_dialog(
+            self.category_dialog = DialogBuilder().build_confirmation_dialog(
                 title="Add new Category:",
                 content=MDBoxLayout(
                     self.generate_category_list(),

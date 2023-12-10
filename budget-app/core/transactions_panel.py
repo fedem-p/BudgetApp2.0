@@ -200,7 +200,7 @@ class TransactionPage:
             )
 
             # create dialog button
-            self.save_dialog = DialogBuilder().build_dialog(
+            self.save_dialog = DialogBuilder().build_save_dialog(
                 title="Add new Transaction:",
                 content=my_box,
                 on_release_function=self.add_new_transaction,
@@ -214,7 +214,7 @@ class TransactionPage:
         # create text input
         display_text = MDLabel(text=dict2str(item))
         # create dialog button
-        self.delete_dialog = DialogBuilder().build_dialog(
+        self.delete_dialog = DialogBuilder().build_save_dialog(
             title="Delete this transaction?",
             content=display_text,
             on_release_function=self.delete_transaction,
@@ -261,7 +261,7 @@ class TransactionPage:
             )
 
             # create dialog button
-            self.transfer_dialog = DialogBuilder().build_dialog(
+            self.transfer_dialog = DialogBuilder().build_save_dialog(
                 title="Add new Transfer:",
                 content=my_box,
                 on_release_function=self.transfer_funds,
