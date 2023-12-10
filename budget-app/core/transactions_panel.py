@@ -18,7 +18,7 @@ from kivymd.uix.textfield import MDTextField
 
 from .data_manager import DataManager
 from .utils.dialogbox import DialogBuilder
-from .utils.dropdownList import DropdownBuilder
+from .utils.dropdown_list import DropdownBuilder
 from .utils.utils import dict2str, str2dict
 from .utils.validator import validate_transaction
 
@@ -170,23 +170,23 @@ class TransactionPage:
                 required=True,
             )
             type_input = DropdownBuilder(
-                id="type", items=["income", "expense"]
+                main_id="type", items=["income", "expense"]
             ).get_dropdown_list()
             amount_input = MDTextField(
                 id="amount", hint_text="Enter a numeric amount", required=True
             )
             account_input = DropdownBuilder(
-                id="account",
+                main_id="account",
                 initial_text="Enter an account",
                 items=self.data_manager.accounts,
             ).get_dropdown_list()
             category_input = DropdownBuilder(
-                id="category",
+                main_id="category",
                 initial_text="Enter a category",
                 items=self.data_manager.categories,
             ).get_dropdown_list()
             subcategory_input = DropdownBuilder(
-                id="subcategory",
+                main_id="subcategory",
                 initial_text="Enter a subcategory",
                 items=self.data_manager.sub_categories,
             ).get_dropdown_list()
@@ -246,12 +246,12 @@ class TransactionPage:
                 id="amount", hint_text="Enter a numeric amount", required=True
             )
             from_account = DropdownBuilder(
-                id="from-account",
+                main_id="from-account",
                 items=self.data_manager.accounts,
                 initial_text="(FROM) Enter withdraw account",
             ).get_dropdown_list()
             to_account = DropdownBuilder(
-                id="to-account",
+                main_id="to-account",
                 initial_text="(TO) Enter deposit account",
                 items=self.data_manager.accounts,
             ).get_dropdown_list()
